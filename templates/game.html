@@ -29,6 +29,10 @@
             {% endfor %}
             <input type="submit" value="Ok">
         </form>
+        <form method="post" action="{{ url_for('game_post') }}">
+            <input type="hidden" name="skip" value="true">
+            <button type="submit">Skip</button>
+        </form>
     {% else %}
         {% for card in player.cards %}
             <div>{{ card.suit }}, {{card.rank}}</div>

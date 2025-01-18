@@ -46,10 +46,13 @@ def game_post():
         return redirect('/ustawienia-rozgrywki')
 
     card = request.form.get('card')
+    game = games[game_uuid]
+
     if not card:
+        if request.form.get('skip'):
+            game.play(skip = True)
         return redirect(url_for('game_get'))
 
-    game = games[game_uuid]
     card = Card(card[0], card[1:])
     if not game.is_valid_move(card):
         return redirect(url_for('game_get'))

@@ -88,8 +88,20 @@ class Player:
 
         return None
 
+    def take_middle(self, middle_cards: List[Card], count: int = 3):
+        if len(middle_cards) <= count:
+            count = len(middle_cards) - 1
+
+        self.cards.extend(middle_cards[-count:])
+        for _ in range(count):
+            middle_cards.pop()
+
     #@abstractmethod
-    def make_move(self, card: Card, middle_cards: List[Card]):
+    def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
+        if skip:
+            self.take_middle(middle_cards)
+            return
+
         card = self.get_card(card)
         if card is None:
             raise ValueError("Gracz nie posiada tej karty.")
@@ -99,7 +111,7 @@ class Player:
 
 
 class AiPlayer(Player):
-    def make_move(self, card: Card, middle_cards: List[Card]):
+    def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
         pass
 
 
@@ -150,9 +162,9 @@ class Round:
         if self.is_over(): self.move_queue[0].lost_rounds += 1
 
 
-    def play(self, card: Card):
+    def play(self, card: Card = None, skip = False):
         current_player = self.move_queue[0]
-        current_player.make_move(card, self.middle_cards)
+        current_player.make_move(self.middle_cards, card, skip)
 
         self.update_queue()
         self.declare_loser_if_over()
