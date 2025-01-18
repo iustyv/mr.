@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Ustawienia rozgrywki
+{% endblock %}
+
+{% block body %}
+<h1>Ustawienia rozgrywki</h1>
+<form action="/ustawienia-rozgrywki" method="post">
+    <select name="game_type">
+        <option value="0">Z komputerem</option>
+        <option value="1">Lokalnie</option>
+    </select>
+    <select name="player_count">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+    </select>
+    <input type="submit" value="Graj">
+</form>
+{% endblock %}
