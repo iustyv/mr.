@@ -82,10 +82,21 @@ class Player:
     def has_starter(self) -> bool:
         return any(card.is_starter() for card in self.cards)
 
+    def get_card(self, card: Card) -> Card | None:
+        for x in self.cards:
+            if x.rank == card.rank and x.suit == card.suit: return x
+
+        return None
+
     #@abstractmethod
     def make_move(self, card: Card, middle_cards: List[Card]):
-        if card >= middle_cards[-1]:
-            middle_cards.append(card)
+        card = self.get_card(card)
+        if card is None:
+            raise ValueError("Gracz nie posiada tej karty.")
+
+        middle_cards.append(card)
+        self.cards.remove(card)
+
 
 class AiPlayer(Player):
     def make_move(self, card: Card, middle_cards: List[Card]):
@@ -125,6 +136,13 @@ class Round:
         if current_player.cards:
             self.move_queue.append(current_player)
 
+    def is_valid_move(self, card: Card) -> bool:
+        if not self.middle_cards:
+            if not card.is_starter(): return False
+            return True
+
+        return card >= self.middle_cards[-1]
+
     def is_over(self) -> bool:
         return len(self.move_queue) == 1
 
@@ -132,9 +150,12 @@ class Round:
         if self.is_over(): self.move_queue[0].lost_rounds += 1
 
 
-    def play(self):
-        #self.deal_cards()
-        #self.create_queue()
+    def play(self, card: Card):
+        current_player = self.move_queue[0]
+        current_player.make_move(card, self.middle_cards)
+
+        self.update_queue()
+        self.declare_loser_if_over()
 
         '''
         player.make_move()

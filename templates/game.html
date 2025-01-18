@@ -37,6 +37,18 @@
     <br>
 {% endfor %}
 
+{% for card in round.middle_cards %}
+    <div>{{ card.suit }}, {{card.rank}}</div>
+{% endfor %}
+
+{% if round.is_over() %}
+    {% for player in round.players %}
+        <div>{{ player.name }}, {{ player.lost_rounds}}</div>
+    {% endfor %}
+{% endif %}
+
+
+
 
 <script>
     function selectCard(suit, rank) {
