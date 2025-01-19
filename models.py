@@ -1,4 +1,6 @@
+import logging
 import string
+import time
 from abc import abstractmethod
 from typing import List, Dict
 import random
@@ -30,6 +32,11 @@ class Card:
         """
         values = {'9': 1, '10': 2, 'J': 3, 'Q': 4, 'K': 5, 'A': 6}
         return values[rank]
+
+    @staticmethod
+    def create_from_form(card: str) -> 'Card':
+        return Card(card[0], card[1:])
+
 
 class Deck:
     def __init__(self):
@@ -96,7 +103,12 @@ class Player:
         for _ in range(count):
             middle_cards.pop()
 
-    #@abstractmethod
+    @abstractmethod
+    def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
+        pass
+
+
+class HumanPlayer(Player):
     def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
         if skip:
             self.take_middle(middle_cards)
@@ -109,10 +121,21 @@ class Player:
         middle_cards.append(card)
         self.cards.remove(card)
 
-
 class AiPlayer(Player):
     def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
-        pass
+        if not middle_cards:
+            card = self.get_card(Card('H', '9'))
+            middle_cards.append(card)
+            self.cards.remove(card)
+            return
+
+        for card in self.cards:
+            if card >= middle_cards[-1]:
+                middle_cards.append(card)
+                self.cards.remove(card)
+                return
+
+        self.take_middle(middle_cards)
 
 
 class Round:
@@ -123,6 +146,7 @@ class Round:
 
         self.deal_cards()
         self.create_queue()
+        self.handle_ai_players()
 
     def deal_cards(self):
         deck = Deck()
@@ -161,6 +185,13 @@ class Round:
     def declare_loser_if_over(self):
         if self.is_over(): self.move_queue[0].lost_rounds += 1
 
+    def handle_ai_players(self):
+        for player in self.move_queue:
+            if isinstance(player, HumanPlayer): break
+
+            player.make_move(self.middle_cards)
+            self.update_queue()
+            self.declare_loser_if_over()
 
     def play(self, card: Card = None, skip = False):
         current_player = self.move_queue[0]
@@ -168,6 +199,7 @@ class Round:
 
         self.update_queue()
         self.declare_loser_if_over()
+        self.handle_ai_players()
 
         '''
         player.make_move()

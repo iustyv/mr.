@@ -19,7 +19,7 @@
     {% endfor %}
 {% endif %}-->
 
-{% for player in round.players %}
+{% for player in round.move_queue %}
     <div>{{ player.name }}</div>
     {% if round.move_queue[0] == player %}
         <form action="{{ url_for('game_post') }}" method="post">
