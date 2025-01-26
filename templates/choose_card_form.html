@@ -1,7 +1,9 @@
 <form action="{{ url_for('game_post') }}" method="post">
     <input type="hidden" id="card" name="card" value="">
     {% for card in player.cards %}
-        <button type="button" id="{{card.suit}}{{card.rank}}" onclick="selectCard('{{card.suit}}', '{{card.rank}}')" class="card">{{ card.suit }}, {{card.rank}}</button>
+        <button type="button" id="{{card.suit}}{{card.rank}}" onclick="selectCard('{{card.suit}}', '{{card.rank}}')" class="card card-btn">
+            <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+        </button>
     {% endfor %}
     <input type="submit" value="Ok">
 </form>

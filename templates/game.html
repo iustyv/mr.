@@ -19,14 +19,19 @@
         {% include 'choose_card_form.html' %}
     {% else %}
         {% for card in player.cards %}
-            <div>{{ card.suit }}, {{card.rank}}</div>
+            <!--<div>{{ card.suit }}, {{card.rank}}</div>-->
+            <span class="card card-middle">
+                <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
+            </span>
         {% endfor %}
     {% endif %}
     <br>
 {% endfor %}
 
 {% for card in round.middle_cards %}
-    <div>{{ card.suit }}, {{card.rank}}</div>
+    <span class="card card-middle">
+        <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+    </span>
 {% endfor %}
 
 {% if round.is_over() %}
@@ -34,5 +39,17 @@
         <div>{{ player.name }}, {{ player.lost_rounds}}</div>
     {% endfor %}
 {% endif %}
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<a href="https://www.flaticon.com/free-icons/playing-cards" title="playing-cards icons">Playing-cards icons created by riajulislam - Flaticon</a><br>
+<a href="https://www.flaticon.com/free-icons/spade-card" title="spade card icons">Spade card icons created by Md Tanvirul Haque - Flaticon</a>
 
 {% endblock %}

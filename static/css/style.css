@@ -1,0 +1,19 @@
+.card {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.card img {
+    height: 100px;
+    width: auto;
+}
+
+.card-btn img {
+    transition: transform 0.2s ease;
+}
+
+.card-btn:hover img {
+    transform: scale(1.1);
+}

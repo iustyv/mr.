@@ -4,5 +4,5 @@ function selectCard(suit, rank) {
             element.removeAttribute("style")
         });
         document.getElementById("card").setAttribute("value", suit + rank);
-        document.getElementById(suit + rank).style.border = "2px solid red";
+        document.getElementById(suit + rank).style.transform = "translateY(-20px)";
     }
