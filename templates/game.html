@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
 {% block head %}
-{% if not round.move_queue[0].is_playable %}
-    <meta http-equiv="refresh" content="2; url={{ url_for('bot_move') }}" >
-{% endif %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/functions.js') }}"></script>
+    {% if not round.move_queue[0].is_playable %}
+        <meta http-equiv="refresh" content="2; url={{ url_for('bot_move') }}" >
+    {% endif %}
 {% endblock %}
 
 {% block title %}
@@ -15,17 +16,7 @@
 {% for player in round.move_queue %}
     <div>{{ player.name }}</div>
     {% if round.move_queue[0] == player and round.move_queue[0].is_playable %}
-        <form action="{{ url_for('game_post') }}" method="post">
-            <input type="hidden" id="card" name="card" value="">
-            {% for card in player.cards %}
-                <button type="button" id="{{card.suit}}{{card.rank}}" onclick="selectCard('{{card.suit}}', '{{card.rank}}')" class="card">{{ card.suit }}, {{card.rank}}</button>
-            {% endfor %}
-            <input type="submit" value="Ok">
-        </form>
-        <form method="post" action="{{ url_for('game_post') }}">
-            <input type="hidden" name="skip" value="true">
-            <button type="submit">Skip</button>
-        </form>
+        {% include 'choose_card_form.html' %}
     {% else %}
         {% for card in player.cards %}
             <div>{{ card.suit }}, {{card.rank}}</div>
@@ -44,17 +35,4 @@
     {% endfor %}
 {% endif %}
 
-
-
-
-<script>
-    function selectCard(suit, rank) {
-        const elements = document.querySelectorAll('.card');
-        elements.forEach(element => {
-            element.removeAttribute("style")
-        });
-        document.getElementById("card").setAttribute("value", suit + rank);
-        document.getElementById(suit + rank).style.border = "2px solid red";
-    }
-</script>
 {% endblock %}

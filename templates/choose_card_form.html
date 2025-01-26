@@ -1,0 +1,11 @@
+<form action="{{ url_for('game_post') }}" method="post">
+    <input type="hidden" id="card" name="card" value="">
+    {% for card in player.cards %}
+        <button type="button" id="{{card.suit}}{{card.rank}}" onclick="selectCard('{{card.suit}}', '{{card.rank}}')" class="card">{{ card.suit }}, {{card.rank}}</button>
+    {% endfor %}
+    <input type="submit" value="Ok">
+</form>
+<form method="post" action="{{ url_for('game_post') }}">
+    <input type="hidden" name="skip" value="true">
+    <button type="submit">Skip</button>
+</form>
