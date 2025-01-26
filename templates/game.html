@@ -1,27 +1,20 @@
 {% extends "base.html" %}
 
+{% block head %}
+{% if not round.move_queue[0].is_playable %}
+    <meta http-equiv="refresh" content="2; url={{ url_for('bot_move') }}" >
+{% endif %}
+{% endblock %}
+
 {% block title %}
     Rozgrywka
 {% endblock %}
 
 {% block body %}
-<!--{% if round.move_queue[0] == round.players[0] %} w move_queue 0 jest ważne bo oznacza początek kolejki, w players 0 jest tylko jednym ze sprawdzanych indeksów
-    <form action="{{ url_for('game_post') }}" method="post">
-        <input type="hidden" id="card" name="card" value="">
-        {% for card in round.players[0].cards %}
-            <button type="button" id="{{card.suit}}{{card.rank}}" onclick="selectCard('{{card.suit}}', '{{card.rank}}')" class="card">{{ card.suit }}, {{card.rank}}</button>
-        {% endfor %}
-        <input type="submit" value="Ok">
-    </form>
-{% else %}
-    {% for card in round.players[0].cards %}
-        <div>{{ card.suit }}, {{card.rank}}</div>
-    {% endfor %}
-{% endif %}-->
 
 {% for player in round.move_queue %}
     <div>{{ player.name }}</div>
-    {% if round.move_queue[0] == player %}
+    {% if round.move_queue[0] == player and round.move_queue[0].is_playable %}
         <form action="{{ url_for('game_post') }}" method="post">
             <input type="hidden" id="card" name="card" value="">
             {% for card in player.cards %}

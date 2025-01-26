@@ -69,12 +69,23 @@ def game_post():
         return redirect(url_for('game_get'))
 
     card = Card.create_from_form(card)
+    logging.error("", card)
     if not game.is_valid_move(card):
         return redirect(url_for('game_get'))
 
-    game.play(card)
+    game.play(card=card)
     return redirect(url_for('game_get'))
 
+@app.get('/bot_move')
+def bot_move():
+    game_uuid = session.get('game_uuid')
+    if game_uuid is None or game_uuid not in games.keys():
+        return redirect('/ustawienia-rozgrywki')
+
+    game = games[game_uuid]
+    game.handle_ai_players()
+
+    return redirect(url_for('game_get'))
 
 if __name__ == "__main__":
     app.run(debug=True, port=12209)

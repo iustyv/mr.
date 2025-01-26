@@ -12,9 +12,17 @@ class Card:
         self.value = Card.assign_value(rank)
         self.img_src = self.suit + self.rank + '.png'
 
+    def __gt__(self, other: 'Card'):
+        """Is greater than: self >= other"""
+        return self.value > other.value
+
     def __ge__(self, other: 'Card'):
         """Is greater or equal: self >= other"""
         return self.value >= other.value
+
+    def __lt__(self, other: 'Card'):
+        """Is less than: self <= other"""
+        return self.value < other.value
 
     def __le__(self, other: 'Card'):
         """Is less or equal: self <= other"""
@@ -80,6 +88,7 @@ class Player:
         self.name = Player.generate_name() if name is None else name
         self.cards: List[Card] = []
         self.lost_rounds = 0
+        self.is_playable = False
 
     @staticmethod
     def generate_name(length: int = 8 ) -> str:
@@ -104,11 +113,15 @@ class Player:
             middle_cards.pop()
 
     @abstractmethod
-    def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
+    def make_move(self, middle_cards: List[Card], **kwargs):
         pass
 
 
 class HumanPlayer(Player):
+    def __init__(self, name: str = None):
+        super().__init__(name)
+        self.is_playable = True
+
     def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
         if skip:
             self.take_middle(middle_cards)
@@ -122,20 +135,29 @@ class HumanPlayer(Player):
         self.cards.remove(card)
 
 class AiPlayer(Player):
-    def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
+    def __init__(self, name: str = None):
+        super().__init__(name)
+        self.is_playable = False
+
+    def get_lowest_valid_card(self, last_card: Card) -> Card | None:
+        valid_cards = [card for card in self.cards if card >= last_card]
+        return min(valid_cards, default=None, key=lambda card: card.value)
+
+
+    def make_move(self, middle_cards: List[Card], **kwargs):
         if not middle_cards:
             card = self.get_card(Card('H', '9'))
             middle_cards.append(card)
             self.cards.remove(card)
             return
 
-        for card in self.cards:
-            if card >= middle_cards[-1]:
-                middle_cards.append(card)
-                self.cards.remove(card)
-                return
+        card = self.get_lowest_valid_card(middle_cards[-1])
+        if card is None:
+            self.take_middle(middle_cards)
+            return
 
-        self.take_middle(middle_cards)
+        middle_cards.append(card)
+        self.cards.remove(card)
 
 
 class Round:
@@ -146,7 +168,6 @@ class Round:
 
         self.deal_cards()
         self.create_queue()
-        self.handle_ai_players()
 
     def deal_cards(self):
         deck = Deck()
@@ -167,10 +188,12 @@ class Round:
         self.move_queue = self.players[starter_index:] + self.players[:starter_index]
 
     def update_queue(self):
-        current_player = self.move_queue[0]
-        self.move_queue.pop(0)
+        current_player = self.move_queue.pop(0)
         if current_player.cards:
             self.move_queue.append(current_player)
+
+    def get_current_player(self):
+        return self.move_queue[0]
 
     def is_valid_move(self, card: Card) -> bool:
         if not self.middle_cards:
@@ -183,23 +206,20 @@ class Round:
         return len(self.move_queue) == 1
 
     def declare_loser_if_over(self):
-        if self.is_over(): self.move_queue[0].lost_rounds += 1
+        if self.is_over(): self.get_current_player().lost_rounds += 1
 
     def handle_ai_players(self):
-        for player in self.move_queue:
-            if isinstance(player, HumanPlayer): break
+        if self.get_current_player().is_playable: return
+        self.get_current_player().make_move(self.middle_cards)
+        self.update_queue()
+        self.declare_loser_if_over()
 
-            player.make_move(self.middle_cards)
-            self.update_queue()
-            self.declare_loser_if_over()
 
-    def play(self, card: Card = None, skip = False):
-        current_player = self.move_queue[0]
-        current_player.make_move(self.middle_cards, card, skip)
+    def play(self, **kwargs):
+        self.get_current_player().make_move(self.middle_cards, **kwargs)
 
         self.update_queue()
         self.declare_loser_if_over()
-        self.handle_ai_players()
 
         '''
         player.make_move()
