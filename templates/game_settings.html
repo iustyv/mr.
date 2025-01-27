@@ -6,10 +6,11 @@
 
 {% block body %}
 <h1>Ustawienia rozgrywki</h1>
-<form action="/ustawienia-rozgrywki" method="post">
+<form action="{{ url_for('game_settings_get') }}" method="post">
     <select name="game_mode">
-        <option value="0" selected="selected">Z komputerem</option>
-        <option value="1">Lokalnie</option>
+        <option value="bot" selected="selected">Z komputerem</option>
+        <option value="hotseat">Lokalnie</option>
+        <option value="multiplayer">Multiplayer</option>
     </select>
     <select name="player_count">
         <option value="2" selected="selected">2</option>
@@ -17,5 +18,14 @@
         <option value="4">4</option>
     </select>
     <input type="submit" value="Graj">
+</form>
+
+<br>
+<br>
+
+<form action="{{ url_for('join_game') }}" method="post">
+    <label for="join_code">Dołącz do gry</label>
+    <input type="text" name="join_code" id="join_code" placeholder="Kod gry">
+    <input type="submit" value="Dołącz">
 </form>
 {% endblock %}

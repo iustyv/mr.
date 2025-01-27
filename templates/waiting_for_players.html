@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <meta http-equiv="refresh" content="2; url={{ url_for('game_get') }}" >
+{% endblock %}
+
+{% block body %}
+    {{ round.join_code }}
+    <br>
+    Oczekiwanie na graczy
+    <br>
+    {{ round.players|count }} gracz(y) / {{ round.player_count }} graczy
+{% endblock %}

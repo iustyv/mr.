@@ -166,9 +166,6 @@ class Round:
         self.players = players
         self.move_queue: List[Player] = []
 
-        self.deal_cards()
-        self.create_queue()
-
     def deal_cards(self):
         deck = Deck()
         card_count = int(len(deck) / len(self.players))
@@ -208,13 +205,6 @@ class Round:
     def declare_loser_if_over(self):
         if self.is_over(): self.get_current_player().lost_rounds += 1
 
-    def handle_ai_players(self):
-        if self.get_current_player().is_playable: return
-        self.get_current_player().make_move(self.middle_cards)
-        self.update_queue()
-        self.declare_loser_if_over()
-
-
     def play(self, **kwargs):
         self.get_current_player().make_move(self.middle_cards, **kwargs)
 
@@ -228,4 +218,34 @@ class Round:
         self.declare_loser_if_over()
             
         '''
+class LocalRound(Round):
+    def __init__(self, players: List[Player]):
+        super().__init__(players)
+        self.deal_cards()
+        self.create_queue()
 
+    def handle_ai_players(self):
+        if self.get_current_player().is_playable: return
+        self.get_current_player().make_move(self.middle_cards)
+        self.update_queue()
+        self.declare_loser_if_over()
+
+class MultiplayerRound(Round):
+    def __init__(self, players: List[Player], player_count: int):
+        super().__init__(players)
+        self.is_started = False
+        self.join_code = Player.generate_name()
+        self.player_count = player_count
+
+    def is_full_room(self):
+        return len(self.players) == self.player_count
+
+    def join(self, player: Player):
+        if self.is_full_room(): return
+        self.players.append(player)
+
+    def start(self):
+        if self.is_started: return
+        self.deal_cards()
+        self.create_queue()
+        self.is_started = True
