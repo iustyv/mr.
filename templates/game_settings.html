@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+{% endblock %}
+
 {% block title %}
     Ustawienia rozgrywki
 {% endblock %}
@@ -7,25 +11,50 @@
 {% block body %}
 <h1>Ustawienia rozgrywki</h1>
 <form action="{{ url_for('game_settings_get') }}" method="post">
-    <select name="game_mode">
+    <select name="game_mode" id="game_mode">
         <option value="bot" selected="selected">Z komputerem</option>
         <option value="hotseat">Lokalnie</option>
         <option value="multiplayer">Multiplayer</option>
     </select>
-    <select name="player_count">
+    <select name="player_count" id="player_count">
         <option value="2" selected="selected">2</option>
         <option value="3">3</option>
         <option value="4">4</option>
     </select>
-    <input type="submit" value="Graj">
+    <input type="submit" value="Graj" onclick="connect(event)">
 </form>
 
 <br>
 <br>
 
-<form action="{{ url_for('join_game') }}" method="post">
+<form>
     <label for="join_code">Dołącz do gry</label>
     <input type="text" name="join_code" id="join_code" placeholder="Kod gry">
-    <input type="submit" value="Dołącz">
+    <button type="button" id="join_game">Dołącz</button>
 </form>
+
+<script>
+    const socket = io({autoConnect : false});
+    function connect(event) {
+        let game_mode = document.getElementById('game_mode').value;
+        if (game_mode === 'multiplayer') {
+            event.preventDefault();
+            socket.connect();
+            socket.on('connect', () => {
+                let player_count = document.getElementById('player_count').value;
+                socket.emit('create_game', player_count);
+            });
+        }
+    }
+
+    socket.on('redirect', (url) => {
+        window.location.href = url;
+    });
+
+    document.getElementById('join_game').addEventListener('click', () => {
+        socket.connect();
+        let join_code = document.getElementById('join_code').value;
+        socket.emit('join_game', join_code);
+    });
+</script>
 {% endblock %}
