@@ -61,6 +61,8 @@ def game_get():
     if not isinstance(round1, MultiplayerRound):
         return render_template('game.html', round=round1)
 
+    print(f"Users in {game_uuid}: {socketio.server.manager.rooms.get('/', {}).get(game_uuid, [])}")
+
     if not round1.is_full_room():
         return render_template('waiting_for_players.html', round=round1)
 
@@ -91,6 +93,43 @@ def game_post():
     game.play(card=card)
     return redirect(url_for('game_get'))
 
+@socketio.on('play_card')
+def handle_play_card(card):
+    game_uuid = session.get('game_uuid')
+    if game_uuid is None or game_uuid not in games.keys():
+        emit('redirect', url_for('game_settings_get'), to=request.sid)
+        return
+
+    game = games[game_uuid]
+
+    if not card:
+        emit('redirect', url_for('game_get'), to=request.sid)
+        return
+
+    card = Card.create_from_form(card)
+    logging.error("", card)
+    if not game.is_valid_move(card):
+        emit('redirect', url_for('game_get'), to=request.sid)
+        return
+
+    game.play(card=card)
+
+    emit('reload', to=game_uuid)
+    emit('redirect', url_for('game_get'))
+
+@socketio.on('skip_move')
+def handle_skip_move():
+    game_uuid = session.get('game_uuid')
+    if game_uuid is None or game_uuid not in games.keys():
+        emit('redirect', url_for('game_settings_get'), to=request.sid)
+        return
+
+    game = games[game_uuid]
+    game.play(skip=True)
+
+    emit('reload', to=game_uuid)
+    emit('redirect', url_for('game_get'))
+
 @app.get('/bot_move')
 def bot_move():
     game_uuid = session.get('game_uuid')
@@ -113,7 +152,7 @@ def save_to_session():
     redirect_url = args.get('redirect_url', '/')
     return redirect(redirect_url)
 
-@socketio.on('create_game')
+@socketio.on('create_game', namespace='/')
 def handle_create_game(player_count):
     player = HumanPlayer()
     game_uuid = str(uuid.uuid4())
@@ -122,9 +161,6 @@ def handle_create_game(player_count):
     games[game_uuid] = game
     active_join_codes[game.join_code] = game_uuid
 
-    join_room(game_uuid)
-    print(f"user joined room {rooms(request.sid)}")
-
     socketio.emit('redirect',
                   url_for('save_to_session',
                           redirect_url='/rozgrywka',
@@ -132,7 +168,7 @@ def handle_create_game(player_count):
                           game_uuid=game_uuid),
                   to=request.sid)
 
-@socketio.on('join_game')
+@socketio.on('join_game', namespace='/')
 def handle_join_game(join_code):
     if join_code is None:
         emit('redirect', url_for('game_settings_get'), to=request.sid)
@@ -147,15 +183,14 @@ def handle_join_game(join_code):
     game = games[game_uuid]
     player = HumanPlayer()
     game.join(player)
-    join_room(game_uuid)
-    print(f"user joined room {rooms(request.sid)}")
-    print(game_uuid)
 
     if game_uuid in socketio.server.manager.rooms.get('/', {}):
+        print(f"Users in {game_uuid}: {socketio.server.manager.rooms.get('/', {}).get(game_uuid, [])}")
         print(f"Emitting 'reload' to room: {game_uuid}")
     else:
         print(f"Room {game_uuid} does not exist!")
-    emit('reload', broadcast=True)
+
+    emit('reload', to=game_uuid)
 
     if game.is_full_room():
         active_join_codes.pop(join_code)
@@ -167,6 +202,11 @@ def handle_join_game(join_code):
                           game_uuid=game_uuid),
                   to=request.sid)
 
+@socketio.on('join_room')
+def handle_join_room():
+    game_uuid = session.get('game_uuid')
+    if game_uuid:
+        join_room(game_uuid)
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, port=12209)

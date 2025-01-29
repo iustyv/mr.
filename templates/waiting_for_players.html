@@ -12,23 +12,13 @@
     <br>
     {{ round.players|count }} gracz(y) / {{ round.player_count }} graczy
 
-    <script>
-        const socket = io({autoConnect : true})
-        console.log('Czy połączono po inicjalizacji:', socket.connected);
-
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
         socket.on('connect', () => {
-            socket.on('reload', () => {
-                console.log('reload')
-                location.reload();
-            });
-        });
-        socket.on('redirect', (url) => {
-            console.log(url)
-            window.location.href = url;
-        });
-
-
-
-    </script>
+            console.log('joined room')
+            socket.emit('join_room')
+        })
+    })
+</script>
 
 {% endblock %}
