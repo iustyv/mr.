@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_socketio import SocketIO, emit, join_room, rooms
 import uuid
-from models import Round, Player, Card, AiPlayer, HumanPlayer, MultiplayerRound, LocalRound
+from models import Round, Player, Card, AiPlayer, HumanPlayer, MultiplayerRound, LocalRound, MultiplayerGame, LocalGame
 import logging
 
 app = Flask(__name__)
@@ -46,7 +46,8 @@ def game_settings_post():
             players.update({str(uuid.uuid4()): HumanPlayer('player' + '%d' % (x + 1))})
 
     game_uuid = str(uuid.uuid4())
-    game = LocalRound(players)
+    game = LocalGame(players)
+    #game = LocalRound(players)
 
     games[game_uuid] = game
     session['game_uuid'] = game_uuid
@@ -59,20 +60,20 @@ def game_get():
         logging.error('Game uuid not found')
         return redirect('/ustawienia-rozgrywki')
 
-    round1 = games[game_uuid]
-    if not isinstance(round1, MultiplayerRound):
-        return render_template('game.html', round=round1)
+    game = games[game_uuid]
+    if not isinstance(game, MultiplayerGame):
+        return render_template('game.html', round=game.current_round)
 
     print(f"Users in {game_uuid}: {socketio.server.manager.rooms.get('/', {}).get(game_uuid, [])}")
 
-    if not round1.is_full_room():
-        return render_template('waiting_for_players.html', round=round1)
+    if not game.is_full_room():
+        return render_template('waiting_for_players.html', game=game)
 
-    if not round1.is_started:
-        round1.start()
+    if not game.is_started:
+        game.start()
 
     player_id = session.get('player_id')
-    return render_template('multiplayer_game.html', round=round1, my_player=round1.players.get(player_id))
+    return render_template('multiplayer_game.html', round=game.current_round, my_player=game.players.get(player_id))
 
 @app.post('/rozgrywka')
 def game_post():
@@ -90,7 +91,7 @@ def game_post():
 
     card = Card.create_from_form(card)
     logging.error("", card)
-    if not game.is_valid_move(card):
+    if not game.current_round.is_valid_move(card):
         return redirect(url_for('game_get'))
 
     game.play(card=card)
@@ -111,7 +112,7 @@ def handle_play_card(card):
 
     card = Card.create_from_form(card)
     logging.error("", card)
-    if not game.is_valid_move(card):
+    if not game.current_round.is_valid_move(card):
         emit('redirect', url_for('game_get'), to=request.sid)
         return
 
@@ -140,7 +141,7 @@ def bot_move():
         return redirect('/ustawienia-rozgrywki')
 
     game = games[game_uuid]
-    game.handle_ai_players()
+    game.current_round.handle_ai_players()
 
     return redirect(url_for('game_get'))
 
@@ -160,7 +161,8 @@ def handle_create_game(player_count):
     player_id = str(uuid.uuid4())
     game_uuid = str(uuid.uuid4())
 
-    game = MultiplayerRound({player_id : HumanPlayer()}, int(player_count))
+    game = MultiplayerGame({player_id : HumanPlayer()}, int(player_count))
+    #game = MultiplayerRound({player_id : HumanPlayer()}, int(player_count))
     games[game_uuid] = game
     active_join_codes[game.join_code] = game_uuid
 

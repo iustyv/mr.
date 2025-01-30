@@ -206,7 +206,7 @@ class Round:
         return card >= self.middle_cards[-1]
 
     def is_over(self) -> bool:
-        return len(self.move_queue) == 1
+        return len(self.move_queue) <= 1
 
     def declare_loser_if_over(self):
         if self.is_over(): self.get_current_player().lost_rounds += 1
@@ -217,13 +217,6 @@ class Round:
         self.update_queue()
         self.declare_loser_if_over()
 
-        '''
-        player.make_move()
-        validate_move()
-        self.update_queue()
-        self.declare_loser_if_over()
-            
-        '''
 class LocalRound(Round):
     def __init__(self, players: Dict[str, Player]):
         super().__init__(players)
@@ -238,11 +231,55 @@ class LocalRound(Round):
         self.declare_loser_if_over()
 
 class MultiplayerRound(Round):
-    def __init__(self, players: Dict[str, Player], player_count: int):
+    def __init__(self, players: Dict[str, Player]):
         super().__init__(players)
         self.is_started = False
+
+    def start(self):
+        if self.is_started: return
+        self.deal_cards()
+        self.create_queue()
+        self.set_player_order()
+        self.is_started = True
+
+class Game:
+    def __init__(self, players: Dict[str, Player]):
+        self.players = players
+        self.current_round = None
+
+    def is_over(self) -> bool:
+        for player in self.players.values():
+            if player.lost_rounds == 3: return True
+        return False
+
+    def declare_loser_if_over(self):
+        if self.is_over(): pass
+
+    @abstractmethod
+    def start_new_round(self):
+        pass
+
+    def play(self, **kwargs):
+        self.current_round.play(**kwargs)
+
+        self.declare_loser_if_over()
+        if self.is_over():
+            self.start_new_round()
+
+class LocalGame(Game):
+    def __init__(self, players: Dict[str, Player]):
+        super().__init__(players)
+        self.start_new_round()
+
+    def start_new_round(self):
+        self.current_round = LocalRound(self.players)
+
+class MultiplayerGame(Game):
+    def __init__(self, players: Dict[str, Player], player_count: int):
+        super().__init__(players)
         self.join_code = Player.generate_name()
         self.player_count = player_count
+        self.is_started = False
 
     def is_full_room(self):
         return len(self.players) == self.player_count
@@ -251,9 +288,12 @@ class MultiplayerRound(Round):
         if self.is_full_room(): return
         self.players.update({player_id: player})
 
+    def start_new_round(self):
+        if not self.is_full_room(): return
+        self.current_round = MultiplayerRound(self.players)
+        self.current_round.start()
+
     def start(self):
-        if self.is_started: return
-        self.deal_cards()
-        self.create_queue()
-        self.set_player_order()
+        if not self.is_full_room(): return
+        self.start_new_round()
         self.is_started = True

@@ -35,7 +35,7 @@
 {% endfor %}
 
 {% if round.is_over() %}
-    {% for player in round.players %}
+    {% for player in round.players.values() %}
         <div>{{ player.name }}, {{ player.lost_rounds}}</div>
     {% endfor %}
 {% endif %}

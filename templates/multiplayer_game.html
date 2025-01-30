@@ -12,7 +12,7 @@
 {% block body %}
 
 {% if round.get_current_player().name == my_player.name %}
-    <div>{{ my_player.name }}</div>
+    <div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
     <form>
         <input type="hidden" id="card" name="card" value="">
         {% for card in my_player.cards %}
@@ -26,6 +26,7 @@
 
 {% else %}
 
+<div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
 {% for card in my_player.cards %}
     <span class="card card-middle">
         <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
@@ -35,7 +36,7 @@
 
 {% for player in round.player_order %}
 {% if not player.name == my_player.name %}
-    <div>{{ player.name }}</div>
+    <div>{{ player.name }} {{ player.lost_rounds }}/3</div>
 {% for card in player.cards %}
     <span class="card card-middle">
         <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
