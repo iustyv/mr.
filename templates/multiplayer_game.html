@@ -11,38 +11,40 @@
 
 {% block body %}
 
-{% for player in round.move_queue %}
-    {% if player.name == my_player.name %}
-        <div>{{ player.name }}</div>
-        {% if loop.first %}
-            <form>
-                <input type="hidden" id="card" name="card" value="">
-                {% for card in player.cards %}
-                    <button type="button" id="{{card.suit}}{{card.rank}}" onclick="selectCard('{{card.suit}}', '{{card.rank}}')" class="card card-btn">
-                        <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
-                    </button>
-                {% endfor %}
-                <button type="button" onclick="playCard()">Ok</button>
-                <button type="button" onclick="skipCard()">Skip</button>
-            </form>
-        {% else %}
-            {% for card in player.cards %}
-            <span class="card card-middle">
-                <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
-            </span>
-            {% endfor %}
-        {% endif %}
-    {% else %}
-        <div>{{ player.name }}</div>
-        {% for card in player.cards %}
-            <!--<div>{{ card.suit }}, {{card.rank}}</div>-->
-            <span class="card card-middle">
-                <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
-            </span>
+{% if round.get_current_player().name == my_player.name %}
+    <div>{{ my_player.name }}</div>
+    <form>
+        <input type="hidden" id="card" name="card" value="">
+        {% for card in my_player.cards %}
+        <button type="button" id="{{card.suit}}{{card.rank}}" onclick="selectCard('{{card.suit}}', '{{card.rank}}')" class="card card-btn">
+            <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+        </button>
         {% endfor %}
-    {% endif %}
+        <button type="button" onclick="playCard()">Ok</button>
+        <button type="button" onclick="skipCard()">Skip</button>
+    </form>
+
+{% else %}
+
+{% for card in my_player.cards %}
+    <span class="card card-middle">
+        <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+    </span>
+{% endfor %}
+{% endif %}
+
+{% for player in round.player_order %}
+{% if not player.name == my_player.name %}
+    <div>{{ player.name }}</div>
+{% for card in player.cards %}
+    <span class="card card-middle">
+        <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
+    </span>
+{% endfor %}
+{% endif %}
     <br>
 {% endfor %}
+
 {% for card in round.middle_cards %}
     <span class="card card-middle">
         <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
@@ -50,9 +52,9 @@
 {% endfor %}
 
 {% if round.is_over() %}
-    {% for player in round.players %}
-        <div>{{ player.name }}, {{ player.lost_rounds}}</div>
-    {% endfor %}
+{% for player in round.player_order %}
+    <div>{{ player.name }}, {{ player.lost_rounds}}</div>
+{% endfor %}
 {% endif %}
 
 <br>

@@ -165,6 +165,7 @@ class Round:
         self.middle_cards: List[Card] = []
         self.players = players
         self.move_queue: List[Player] = []
+        self.player_order: List[Player] = []
 
     def deal_cards(self):
         deck = Deck()
@@ -190,6 +191,9 @@ class Round:
         current_player = self.move_queue.pop(0)
         if current_player.cards:
             self.move_queue.append(current_player)
+
+    def set_player_order(self):
+        self.player_order = self.move_queue.copy()
 
     def get_current_player(self):
         return self.move_queue[0]
@@ -225,6 +229,7 @@ class LocalRound(Round):
         super().__init__(players)
         self.deal_cards()
         self.create_queue()
+        self.set_player_order()
 
     def handle_ai_players(self):
         if self.get_current_player().is_playable: return
@@ -250,4 +255,5 @@ class MultiplayerRound(Round):
         if self.is_started: return
         self.deal_cards()
         self.create_queue()
+        self.set_player_order()
         self.is_started = True
