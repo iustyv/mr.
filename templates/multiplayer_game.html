@@ -11,7 +11,9 @@
 
 {% block body %}
 
-{% if round.get_current_player().name == my_player.name %}
+{% set round = game.current_round %}
+
+{% if round.get_current_player().name == my_player.name and not round.is_over() %}
     <div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
     <form>
         <input type="hidden" id="card" name="card" value="">
@@ -52,10 +54,21 @@
     </span>
 {% endfor %}
 
-{% if round.is_over() %}
+{% if round.is_over() and not game.is_over() %}
 {% for player in round.player_order %}
     <div>{{ player.name }}, {{ player.lost_rounds}}</div>
 {% endfor %}
+
+{% if my_player == game.game_host %}
+    <button type="button" onclick="startNewRound()">Restart</button>
+{% endif %}
+
+{% elif game.is_over() %}
+    <p>Player {{ round.loser.name }} has lost the game.</p>
+{% if my_player == game.game_host %}
+    <button type="button" onclick="restartGame()">Restart</button>
+{% endif %}
+
 {% endif %}
 
 <br>

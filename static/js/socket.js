@@ -28,6 +28,10 @@ function createMultiplayerGame(event) {
     }
 }
 
+function startNewRound() {
+    socket.emit('start_new_round');
+}
+
 function joinMultiplayerGame() {
     let join_code = document.getElementById('join_code').value;
     socket.emit('join_game', join_code);
@@ -42,4 +46,8 @@ function playCard() {
 
 function skipCard() {
     socket.emit('skip_move');
+}
+
+function restartGame() {
+    socket.emit('restart_game');
 }

@@ -47,7 +47,6 @@ def game_settings_post():
 
     game_uuid = str(uuid.uuid4())
     game = LocalGame(players)
-    #game = LocalRound(players)
 
     games[game_uuid] = game
     session['game_uuid'] = game_uuid
@@ -66,14 +65,14 @@ def game_get():
 
     print(f"Users in {game_uuid}: {socketio.server.manager.rooms.get('/', {}).get(game_uuid, [])}")
 
+    player_id = session.get('player_id')
     if not game.is_full_room():
-        return render_template('waiting_for_players.html', game=game)
+        return render_template('waiting_for_players.html', game=game, my_player=game.players.get(player_id))
 
     if not game.is_started:
         game.start()
 
-    player_id = session.get('player_id')
-    return render_template('multiplayer_game.html', round=game.current_round, my_player=game.players.get(player_id))
+    return render_template('multiplayer_game.html', game=game, my_player=game.players.get(player_id))
 
 @app.post('/rozgrywka')
 def game_post():
@@ -160,9 +159,10 @@ def save_to_session():
 def handle_create_game(player_count):
     player_id = str(uuid.uuid4())
     game_uuid = str(uuid.uuid4())
+    player = HumanPlayer()
 
-    game = MultiplayerGame({player_id : HumanPlayer()}, int(player_count))
-    #game = MultiplayerRound({player_id : HumanPlayer()}, int(player_count))
+    game = MultiplayerGame({player_id : player}, int(player_count), player)
+
     games[game_uuid] = game
     active_join_codes[game.join_code] = game_uuid
 
@@ -206,6 +206,37 @@ def handle_join_game(join_code):
                           player_id=player_id,
                           game_uuid=game_uuid),
                   to=request.sid)
+
+@socketio.on('start_new_round')
+def handle_start_new_round():
+    game_uuid = session.get('game_uuid')
+    if game_uuid is None or game_uuid not in games.keys():
+        emit('redirect', url_for('game_settings_get'))
+        return
+
+    game = games[game_uuid]
+    game.start_new_round()
+    emit('reload', to=game_uuid)
+
+@socketio.on('restart_game')
+def handle_restart_game():
+    game_uuid = session.get('game_uuid')
+    if game_uuid is None or game_uuid not in games.keys():
+        emit('redirect', url_for('game_settings_get'))
+        return
+
+    game = games[game_uuid]
+
+    players = {}
+    host_key = None
+    for key, player in game.players.items():
+        if player == game.game_host:
+            host_key = key
+        players[key] = HumanPlayer(player.name)
+
+    games[game_uuid] = MultiplayerGame(players, game.player_count, players[host_key])
+
+    emit('reload', to=game_uuid)
 
 @socketio.on('join_room')
 def handle_join_room():
