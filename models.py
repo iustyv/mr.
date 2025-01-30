@@ -42,8 +42,11 @@ class Card:
         return values[rank]
 
     @staticmethod
-    def create_from_form(card: str) -> 'Card':
-        return Card(card[0], card[1:])
+    def create_from_form(card: str) -> 'Card' | List['Card']:
+        move = card.split(',')
+        if len(move) == 1:
+            return Card(card[0], card[1:])
+        return [Card(card[0], card[1:]) for card in move]
 
 
 class Deck:
@@ -122,17 +125,23 @@ class HumanPlayer(Player):
         super().__init__(name)
         self.is_playable = True
 
-    def make_move(self, middle_cards: List[Card], card: Card = None, skip = False):
+    def make_move(self, middle_cards: List[Card], card: Card | List[Card] = None, skip = False):
         if skip:
             self.take_middle(middle_cards)
             return
 
-        card = self.get_card(card)
-        if card is None:
+        print(card)
+        if isinstance(card, Card):
+            card = [self.get_card(card)]
+        else:
+            card = [self.get_card(c) for c in card]
+
+        if not card:
             raise ValueError("Gracz nie posiada tej karty.")
 
-        middle_cards.append(card)
-        self.cards.remove(card)
+        middle_cards.extend(card)
+        for c in card:
+            self.cards.remove(c)
 
 class AiPlayer(Player):
     def __init__(self, name: str = None):
@@ -199,12 +208,31 @@ class Round:
     def get_current_player(self):
         return self.move_queue[0]
 
-    def is_valid_move(self, card: Card) -> bool:
-        if not self.middle_cards:
-            if not card.is_starter(): return False
-            return True
+    def is_valid_move(self, card: Card | List[Card]) -> bool:
+        if isinstance(card, Card):
+            if not self.middle_cards:
+                if not card.is_starter(): return False
+                return True
+            return card >= self.middle_cards[-1]
+        else:
+            if len(card) < 3: return False
+            if len(card) == 3:
+                if not self.middle_cards: return False
+                if not self.middle_cards[-1].is_starter(): return False
+                for c in card:
+                    if c.rank != '9': return False
+                return True
+            if len(card) == 4:
+                rank = card[0].rank
+                print(rank)
+                for c in card:
+                    if c.rank != rank: return False
+                if not self.middle_cards:
+                    if rank != '9': return False
+                if self.middle_cards[-1] > card[0]: return False
+                return True
+            return False
 
-        return card >= self.middle_cards[-1]
 
     def is_over(self) -> bool:
         return len(self.move_queue) <= 1

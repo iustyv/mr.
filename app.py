@@ -108,7 +108,6 @@ def handle_play_card(card):
     if not card:
         emit('redirect', url_for('game_get'), to=request.sid)
         return
-
     card = Card.create_from_form(card)
     logging.error("", card)
     if not game.current_round.is_valid_move(card):
