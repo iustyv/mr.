@@ -12,9 +12,7 @@
 {% block body %}
 
 {% for player in round.move_queue %}
-    <div>Session: {{ session.player_name }}</div>
-    {% if player.name == session.player_name %}
-
+    {% if player.name == my_player.name %}
         <div>{{ player.name }}</div>
         {% if loop.first %}
             <form>

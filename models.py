@@ -161,7 +161,7 @@ class AiPlayer(Player):
 
 
 class Round:
-    def __init__(self, players: List[Player]):
+    def __init__(self, players: Dict[str, Player]):
         self.middle_cards: List[Card] = []
         self.players = players
         self.move_queue: List[Player] = []
@@ -169,20 +169,22 @@ class Round:
     def deal_cards(self):
         deck = Deck()
         card_count = int(len(deck) / len(self.players))
-        for player in self.players:
+        for player in self.players.values():
             player.cards = deck.deal(card_count)
 
     def create_queue(self):
-        starter_index = None
-        for i, player in enumerate(self.players):
+        starter_player = None
+        players = list(self.players.values())
+        for player in players:
             if player.has_starter():
-                starter_index = i
+                starter_player = player
                 break
 
-        if starter_index is None:
+        if starter_player is None:
             raise ValueError("Nie znaleziono gracza z kartą startową.")
 
-        self.move_queue = self.players[starter_index:] + self.players[:starter_index]
+        starter_pos = players.index(starter_player)
+        self.move_queue = players[starter_pos:] + players[:starter_pos]
 
     def update_queue(self):
         current_player = self.move_queue.pop(0)
@@ -219,7 +221,7 @@ class Round:
             
         '''
 class LocalRound(Round):
-    def __init__(self, players: List[Player]):
+    def __init__(self, players: Dict[str, Player]):
         super().__init__(players)
         self.deal_cards()
         self.create_queue()
@@ -231,7 +233,7 @@ class LocalRound(Round):
         self.declare_loser_if_over()
 
 class MultiplayerRound(Round):
-    def __init__(self, players: List[Player], player_count: int):
+    def __init__(self, players: Dict[str, Player], player_count: int):
         super().__init__(players)
         self.is_started = False
         self.join_code = Player.generate_name()
@@ -240,9 +242,9 @@ class MultiplayerRound(Round):
     def is_full_room(self):
         return len(self.players) == self.player_count
 
-    def join(self, player: Player):
+    def join(self, player_id: str, player: Player):
         if self.is_full_room(): return
-        self.players.append(player)
+        self.players.update({player_id: player})
 
     def start(self):
         if self.is_started: return

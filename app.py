@@ -36,12 +36,14 @@ def game_settings_post():
     if game_mode == 'multiplayer':
         return redirect(url_for('game_get'))
 
-    players = []
+    players = {}
     if game_mode == 'bot':
-        players = [HumanPlayer('human')]
-        players.extend([AiPlayer('player'+'%d'%(x+2)) for x in range(player_count-1)])
+        players.update({str(uuid.uuid4()) : HumanPlayer('human')})
+        for x in range(player_count - 1):
+            players.update({str(uuid.uuid4()) : AiPlayer('player' + '%d' % (x + 2))})
     elif game_mode == 'hotseat':
-        players = [HumanPlayer('player' + '%d' % (x + 1)) for x in range(player_count)]
+        for x in range(player_count):
+            players.update({str(uuid.uuid4()): HumanPlayer('player' + '%d' % (x + 1))})
 
     game_uuid = str(uuid.uuid4())
     game = LocalRound(players)
@@ -69,7 +71,8 @@ def game_get():
     if not round1.is_started:
         round1.start()
 
-    return render_template('multiplayer_game.html', round=round1)
+    player_id = session.get('player_id')
+    return render_template('multiplayer_game.html', round=round1, my_player=round1.players.get(player_id))
 
 @app.post('/rozgrywka')
 def game_post():
@@ -154,17 +157,17 @@ def save_to_session():
 
 @socketio.on('create_game', namespace='/')
 def handle_create_game(player_count):
-    player = HumanPlayer()
+    player_id = str(uuid.uuid4())
     game_uuid = str(uuid.uuid4())
 
-    game = MultiplayerRound([player], int(player_count))
+    game = MultiplayerRound({player_id : HumanPlayer()}, int(player_count))
     games[game_uuid] = game
     active_join_codes[game.join_code] = game_uuid
 
     socketio.emit('redirect',
                   url_for('save_to_session',
                           redirect_url='/rozgrywka',
-                          player_name=player.name,
+                          player_id=player_id,
                           game_uuid=game_uuid),
                   to=request.sid)
 
@@ -181,8 +184,8 @@ def handle_join_game(join_code):
         return
 
     game = games[game_uuid]
-    player = HumanPlayer()
-    game.join(player)
+    player_id = str(uuid.uuid4())
+    game.join(player_id, HumanPlayer())
 
     if game_uuid in socketio.server.manager.rooms.get('/', {}):
         print(f"Users in {game_uuid}: {socketio.server.manager.rooms.get('/', {}).get(game_uuid, [])}")
@@ -198,7 +201,7 @@ def handle_join_game(join_code):
     emit('redirect',
                   url_for('save_to_session',
                           redirect_url='/rozgrywka',
-                          player_name=player.name,
+                          player_id=player_id,
                           game_uuid=game_uuid),
                   to=request.sid)
 
