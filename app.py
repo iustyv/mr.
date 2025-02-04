@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, abort
 from flask_socketio import SocketIO, emit, join_room, rooms
 import uuid
 from models import Round, Player, Card, AiPlayer, HumanPlayer, MultiplayerRound, LocalRound, MultiplayerGame, LocalGame
@@ -145,6 +145,9 @@ def bot_move():
 
 @app.get('/sesja')
 def save_to_session():
+    if request.referrer is None or request.referrer == request.url_root:
+        print('manual access blocked')
+        return redirect(url_for('game_settings_get'))
     args = request.args
 
     for key, value in args.items():
