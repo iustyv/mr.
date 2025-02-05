@@ -115,9 +115,7 @@ def handle_play_card(card):
         return
 
     game.play(card=card)
-
-    emit('reload', to=game_uuid)
-    emit('redirect', url_for('game_get'))
+    emit('update_game', to=game_uuid)
 
 @socketio.on('skip_move')
 def handle_skip_move():
@@ -129,8 +127,7 @@ def handle_skip_move():
     game = games[game_uuid]
     game.play(skip=True)
 
-    emit('reload', to=game_uuid)
-    emit('redirect', url_for('game_get'))
+    emit('update_game', to=game_uuid)
 
 @app.get('/bot_move')
 def bot_move():

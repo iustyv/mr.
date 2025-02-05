@@ -12,6 +12,7 @@
 {% block body %}
 
 {% set round = game.current_round %}
+<div id="game-state" hx-get="{{ url_for('game_get') }}" hx-trigger="ws-message" hx-swap="innerHTML">
 
 {% if round.get_current_player().name == my_player.name and not round.is_over() %}
     <div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
@@ -70,6 +71,7 @@
 {% endif %}
 
 {% endif %}
+</div>
 
 <br>
 <br>

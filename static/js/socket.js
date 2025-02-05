@@ -18,6 +18,10 @@ socket.on('redirect', (url) => {
     window.location.href = url;
 });
 
+socket.on("update_game", () => {
+    htmx.trigger("#game-state", "ws-message");
+});
+
 function createMultiplayerGame(event) {
     let game_mode = document.getElementById('game_mode').value;
     if (game_mode === 'multiplayer') {
@@ -38,10 +42,12 @@ function joinMultiplayerGame() {
 }
 
 function playCard() {
+    console.log(selectedCards)
     let card = document.getElementById('card').value;
     if (card) {
         socket.emit('play_card', card);
     }
+    selectedCards = []
 }
 
 function skipCard() {
