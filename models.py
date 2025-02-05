@@ -111,6 +111,8 @@ class Player:
         if len(middle_cards) <= count:
             count = len(middle_cards) - 1
 
+        if not count: return
+
         self.cards.extend(middle_cards[-count:])
         for _ in range(count):
             middle_cards.pop()
@@ -208,7 +210,12 @@ class Round:
     def get_current_player(self):
         return self.move_queue[0]
 
-    def is_valid_move(self, card: Card | List[Card]) -> bool:
+    def is_valid_move(self, card: Card | List[Card] = None, skip = False) -> bool:
+        if not card:
+            if skip:
+               return bool(self.middle_cards)
+            raise ValueError("Brak ruchu do zweryfikowania.")
+
         if isinstance(card, Card):
             if not self.middle_cards:
                 if not card.is_starter(): return False

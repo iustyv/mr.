@@ -125,7 +125,8 @@ def handle_skip_move():
         return
 
     game = games[game_uuid]
-    game.play(skip=True)
+    if game.current_round.is_valid_move(skip=True):
+        game.play(skip=True)
 
     emit('update_game', to=game_uuid)
 
