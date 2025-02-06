@@ -110,11 +110,9 @@ def handle_play_card(card):
         return
     card = Card.create_from_form(card)
     logging.error("", card)
-    if not game.current_round.is_valid_move(card):
-        emit('redirect', url_for('game_get'), to=request.sid)
-        return
+    if game.current_round.is_valid_move(card):
+        game.play(card=card)
 
-    game.play(card=card)
     emit('update_game', to=game_uuid)
 
 @socketio.on('skip_move')
@@ -127,8 +125,7 @@ def handle_skip_move():
     game = games[game_uuid]
     if game.current_round.is_valid_move(skip=True):
         game.play(skip=True)
-
-    emit('update_game', to=game_uuid)
+        emit('update_game', to=game_uuid)
 
 @app.get('/bot_move')
 def bot_move():
@@ -243,6 +240,19 @@ def handle_join_room():
     game_uuid = session.get('game_uuid')
     if game_uuid:
         join_room(game_uuid)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f"Client disconnected: {request.sid}")
+    game_uuid = session.get('game_uuid')
+    player_id = session.get('player_id')
+    if not game_uuid or not player_id: return
+
+    game = games[game_uuid]
+    player_name = game.players.get(player_id).name
+
+    emit('player_disconnected', {"player_id": player_id, "player_name": player_name}, to=game_uuid)
+
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, port=12209)
