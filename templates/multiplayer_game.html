@@ -14,7 +14,7 @@
 {% set round = game.current_round %}
 <div id="game-state" hx-get="{{ url_for('game_get') }}" hx-trigger="ws-message" hx-swap="innerHTML">
 
-{% if round.get_current_player().name == my_player.name and not round.is_over() %}
+{% if round.get_current_player().name == my_player.name and not round.is_over() and game.is_full_room() %}
     <div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
     <form>
         <input type="hidden" id="card" name="card" value="">
@@ -101,6 +101,7 @@
 
             element.innerHTML = 'Player ' + data.player_name + ' has left the game.'
             element.style.display = 'block'
+            htmx.trigger('#game-state', 'ws-message')
         });
     })
 

@@ -66,7 +66,7 @@ def game_get():
     print(f"Users in {game_uuid}: {socketio.server.manager.rooms.get('/', {}).get(game_uuid, [])}")
 
     player_id = session.get('player_id')
-    if not game.is_full_room():
+    if not game.is_full_room() and not game.is_started:
         return render_template('waiting_for_players.html', game=game, my_player=game.players.get(player_id))
 
     if not game.is_started:
@@ -250,6 +250,7 @@ def handle_disconnect():
 
     game = games[game_uuid]
     player_name = game.players.get(player_id).name
+    game.leave(player_id)
 
     emit('player_disconnected', {"player_id": player_id, "player_name": player_name}, to=game_uuid)
 
