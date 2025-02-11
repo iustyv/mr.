@@ -99,7 +99,8 @@ def game_post():
 @socketio.on('play_card')
 def handle_play_card(card):
     game_uuid = session.get('game_uuid')
-    if game_uuid is None or game_uuid not in games.keys():
+    player_id = session.get('player_id')
+    if game_uuid is None or game_uuid not in games.keys() or not player_id:
         emit('redirect', url_for('game_settings_get'), to=request.sid)
         return
 
@@ -113,7 +114,20 @@ def handle_play_card(card):
     if game.current_round.is_valid_move(card):
         game.play(card=card)
 
-    emit('update_game', to=game_uuid)
+    emit('request_game_state_update', to=game_uuid)
+
+@socketio.on('request_game_state_update')
+def handle_request_game_state_update():
+    game_uuid = session.get('game_uuid')
+    player_id = session.get('player_id')
+
+    if not game_uuid or not player_id:
+        return
+
+    game = games[game_uuid]
+    player = game.players.get(player_id)
+
+    emit('update_game_state', {'html': render_template('game_state.html', game=game, my_player=player)})
 
 @socketio.on('skip_move')
 def handle_skip_move():
@@ -125,7 +139,7 @@ def handle_skip_move():
     game = games[game_uuid]
     if game.current_round.is_valid_move(skip=True):
         game.play(skip=True)
-        emit('update_game', to=game_uuid)
+        emit('request_game_state_update', to=game_uuid)
 
 @app.get('/bot_move')
 def bot_move():
@@ -238,8 +252,18 @@ def handle_restart_game():
 @socketio.on('join_room')
 def handle_join_room():
     game_uuid = session.get('game_uuid')
+    player_id = session.get('player_id')
     if game_uuid:
         join_room(game_uuid)
+
+    game = games[game_uuid]
+    if player_id not in game.inactive_players: return
+
+    game.inactive_players = list(filter(lambda p_id: p_id != player_id, game.inactive_players))
+
+    player_name = game.players.get(player_id).name
+    emit('player_connected', {"player_id": player_id, "player_name": player_name}, to=game_uuid)
+
 
 @socketio.on('disconnect')
 def handle_disconnect():

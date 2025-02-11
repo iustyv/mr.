@@ -32,4 +32,9 @@
     <input type="text" name="join_code" id="join_code" placeholder="Kod gry">
     <button type="button" onclick="joinMultiplayerGame()">Dołącz</button>
 </form>
+
+{% if session.game_uuid %}
+<a href="{{ url_for('game_get') }}">Wróć do gry</a>
+{% endif %}
+
 {% endblock %}
