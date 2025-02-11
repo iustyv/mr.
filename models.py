@@ -137,6 +137,8 @@ class HumanPlayer(Player):
             card = [self.get_card(card)]
         else:
             card = [self.get_card(c) for c in card]
+            if len(card) == 4 and card[0].rank == '9':
+                card.sort(key = lambda c: not c.is_starter())
 
         if not card:
             raise ValueError("Gracz nie posiada tej karty.")
@@ -236,6 +238,7 @@ class Round:
                     if c.rank != rank: return False
                 if not self.middle_cards:
                     if rank != '9': return False
+                    return True
                 if self.middle_cards[-1] > card[0]: return False
                 return True
             return False
