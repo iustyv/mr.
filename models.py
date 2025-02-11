@@ -287,7 +287,7 @@ class Game:
 
     def is_over(self) -> bool:
         for player in self.players.values():
-            if player.lost_rounds == 1: return True
+            if player.lost_rounds == 3: return True
         return False
 
     def declare_loser_if_over(self):

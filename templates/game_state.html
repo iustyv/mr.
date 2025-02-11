@@ -52,9 +52,6 @@
     {% for player in round.player_order %}
         <div>{{ player.name }}, {{ player.lost_rounds}}</div>
     {% endfor %}
-    {% if my_player == game.game_host %}
-        <button type="button" onclick="startNewRound()">Restart</button>
-    {% endif %}
 {% elif game.is_over() %}
     <p>Player {{ round.loser.name }} has lost the game.</p>
     {% if my_player == game.game_host %}

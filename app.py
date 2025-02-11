@@ -218,17 +218,6 @@ def handle_join_game(join_code):
                           game_uuid=game_uuid),
                   to=request.sid)
 
-@socketio.on('start_new_round')
-def handle_start_new_round():
-    game_uuid = session.get('game_uuid')
-    if game_uuid is None or game_uuid not in games.keys():
-        emit('redirect', url_for('game_settings_get'))
-        return
-
-    game = games[game_uuid]
-    game.start_new_round()
-    emit('reload', to=game_uuid)
-
 @socketio.on('restart_game')
 def handle_restart_game():
     game_uuid = session.get('game_uuid')
@@ -245,9 +234,11 @@ def handle_restart_game():
             host_key = key
         players[key] = HumanPlayer(player.name)
 
-    games[game_uuid] = MultiplayerGame(players, game.player_count, players[host_key])
+    game = MultiplayerGame(players, game.player_count, players[host_key])
+    games[game_uuid] = game
+    game.start()
 
-    emit('reload', to=game_uuid)
+    emit('request_game_state_update', to=game_uuid)
 
 @socketio.on('join_room')
 def handle_join_room():

@@ -32,10 +32,6 @@ function createMultiplayerGame(event) {
     }
 }
 
-function startNewRound() {
-    socket.emit('start_new_round');
-}
-
 function joinMultiplayerGame() {
     let join_code = document.getElementById('join_code').value;
     socket.emit('join_game', join_code);
