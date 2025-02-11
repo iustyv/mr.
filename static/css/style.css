@@ -9,10 +9,13 @@
     width: auto;
     border: #3a3a3a solid 1px;
     border-radius: 9px;
+    background-color: white;
 }
 
 .card-btn img {
     transition: transform 0.2s ease;
+    background-color: white;
+    border-radius: 10px;
 }
 
 .card-btn:hover img {
@@ -20,14 +23,15 @@
 }
 
 .card-container {
-    position: relative;
+    display: flex;
+    flex-wrap: wrap;
     min-height: 100px;
+    padding-left: 40px;
 }
 
 .card-child {
     background-color: white;
     height: 100px;
     border-radius: 10px;
-    position: absolute;
-    top: 0;
+    margin-left: -40px;
 }
