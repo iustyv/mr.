@@ -2,12 +2,13 @@
     border: none;
     background: none;
     padding: 0;
-    cursor: pointer;
 }
 
 .card img {
     height: 100px;
     width: auto;
+    border: #3a3a3a solid 1px;
+    border-radius: 9px;
 }
 
 .card-btn img {
@@ -16,4 +17,17 @@
 
 .card-btn:hover img {
     transform: scale(1.1);
+}
+
+.card-container {
+    position: relative;
+    min-height: 100px;
+}
+
+.card-child {
+    background-color: white;
+    height: 100px;
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
 }

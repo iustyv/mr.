@@ -2,35 +2,40 @@
 
 <div>
     <div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
-    <div>
-        {% if round.get_current_player().name == my_player.name and not round.is_over() and game.is_full_room() %}
-            <form>
-                <input type="hidden" id="card" name="card" value="">
-                {% for card in my_player.cards %}
-                <button type="button" id="{{card.suit}}{{card.rank}}" onclick="toggleCardSelection('{{card.suit}}', '{{card.rank}}')" class="card card-btn">
+    {% if round.get_current_player().name == my_player.name and not round.is_over() and game.is_full_room() %}
+        <div class="card-container">
+            {% for card in my_player.cards %}
+                {% set margin = loop.index0 * 40 %}
+                <button type="button" id="{{card.suit}}{{card.rank}}" onclick="toggleCardSelection('{{card.suit}}', '{{card.rank}}')" class="card card-btn card-child" style="left: {{ margin }}px;">
                     <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
                 </button>
-                {% endfor %}
-                <button type="button" onclick="playCard()">Ok</button>
-                <button type="button" onclick="skipCard()">Skip</button>
-            </form>
-        {% else %}
+            {% endfor %}
+        </div>
+        <form>
+            <input type="hidden" id="card" name="card" value="">
+            <button type="button" onclick="playCard()">Ok</button>
+            <button type="button" onclick="skipCard()">Skip</button>
+        </form>
+    {% else %}
+        <div class="card-container">
             {% for card in my_player.cards %}
-                <span class="card card-middle">
+            {% set margin = loop.index0 * 40 %}
+                <span class="card card-middle card-child" style="left: {{ margin }}px;">
                     <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
                 </span>
             {% endfor %}
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 </div>
 
 {% for player in round.player_order %}
     {% if not player.name == my_player.name %}
         <div id="{{ player.name }}">
             <div>{{ player.name }} {{ player.lost_rounds }}/3</div>
-            <div>
+            <div class="card-container">
                 {% for card in player.cards %}
-                    <span class="card card-middle">
+                    {% set margin = loop.index0 * 25 %}
+                    <span class="card card-middle card-child" style="left: {{ margin }}px;">
                         <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
                     </span>
                 {% endfor %}
@@ -40,9 +45,10 @@
     <br>
 {% endfor %}
 
-<div>
+<div class="card-container">
     {% for card in round.middle_cards %}
-        <span class="card card-middle">
+    {% set margin = loop.index0 * 40 %}
+        <span class="card card-middle card-child" style="left: {{ margin }}px;">
             <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
         </span>
     {% endfor %}
