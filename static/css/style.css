@@ -1,3 +1,9 @@
+body {
+    background-color: #010C14;
+    color: whitesmoke;
+    font-family: 'Liter', sans-serif;
+}
+
 .card {
     border: none;
     background: none;
@@ -37,6 +43,7 @@
     padding: 8px 30px;
     font-size: 15px;
     transition: 0.2s ease;
+    font-family: 'Liter', sans-serif;
     border: 2px solid #FCCEFB;
     text-decoration: none;
 }
