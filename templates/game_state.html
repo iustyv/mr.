@@ -1,65 +1,69 @@
 {% set round = game.current_round %}
 
-<div>
-    <div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
-    {% if round.get_current_player().name == my_player.name and not round.is_over() and game.is_full_room() %}
-        <div class="card-container">
-            {% for card in my_player.cards %}
-                {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
-                <button type="button" id="{{card.suit}}{{card.rank}}" onclick="toggleCardSelection('{{card.suit}}', '{{card.rank}}')" class="card card-btn card-child">
-                    <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
-                </button>
-            {% endfor %}
-        </div>
-        <form>
-            <input type="hidden" id="card" name="card" value="">
-            <button type="button" onclick="playCard()" class="btn btn-pink">Ok</button>
-            <button type="button" onclick="skipCard()" class="btn btn-dark">Skip</button>
-        </form>
-    {% else %}
-        <div class="card-container">
-            {% for card in my_player.cards %}
-                {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
-                <span class="card card-middle card-child">
-                    <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
-                </span>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
+<div id="main-board">
+    <div class="card-container">
+        {% for card in round.middle_cards %}
+            {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '.png' %}
+            <span class="card card-middle card-child">
+                <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
+            </span>
+        {% endfor %}
+    </div>
 
-{% for player in round.player_order %}
-    {% if not player.name == my_player.name %}
-        <div id="{{ player.name }}">
-            <div>{{ player.name }} {{ player.lost_rounds }}/3</div>
+    <div>
+        <div>{{ my_player.name }} {{ my_player.lost_rounds }}/3</div>
+        {% if round.get_current_player().name == my_player.name and not round.is_over() and game.is_full_room() %}
             <div class="card-container">
-                {% for card in player.cards %}
+                {% for card in my_player.cards %}
+                    {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
+                    <button type="button" id="{{card.suit}}{{card.rank}}" onclick="toggleCardSelection('{{card.suit}}', '{{card.rank}}')" class="card card-btn card-child">
+                        <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
+                    </button>
+                {% endfor %}
+            </div>
+            <form>
+                <input type="hidden" id="card" name="card" value="">
+                <button type="button" onclick="playCard()" class="btn btn-pink">Ok</button>
+                <button type="button" onclick="skipCard()" class="btn btn-dark">Skip</button>
+            </form>
+        {% else %}
+            <div class="card-container">
+                {% for card in my_player.cards %}
+                    {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
                     <span class="card card-middle card-child">
-                        <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
+                        <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
                     </span>
                 {% endfor %}
             </div>
-        </div>
-    {% endif %}
-    <br>
-{% endfor %}
+        {% endif %}
+    </div>
 
-<div class="card-container">
-    {% for card in round.middle_cards %}
-        {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '.png' %}
-        <span class="card card-middle card-child">
-            <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
-        </span>
-    {% endfor %}
+    {% if round.is_over() and not game.is_over() %}
+        {% for player in round.player_order %}
+            <div>{{ player.name }}, {{ player.lost_rounds}}</div>
+        {% endfor %}
+    {% elif game.is_over() %}
+        <p>Player {{ round.loser.name }} has lost the game.</p>
+        {% if my_player == game.game_host %}
+            <button type="button" onclick="restartGame()" class="btn btn-pink">Restart</button>
+        {% endif %}
+    {% endif %}
 </div>
 
-{% if round.is_over() and not game.is_over() %}
+<div id="cards-aside">
     {% for player in round.player_order %}
-        <div>{{ player.name }}, {{ player.lost_rounds}}</div>
+        {% if not player.name == my_player.name %}
+            <div id="{{ player.name }}">
+                <div>{{ player.name }} {{ player.lost_rounds }}/3</div>
+                <div class="card-container">
+                    {% for card in player.cards %}
+                        <span class="card card-middle card-child">
+                            <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        <br>
     {% endfor %}
-{% elif game.is_over() %}
-    <p>Player {{ round.loser.name }} has lost the game.</p>
-    {% if my_player == game.game_host %}
-        <button type="button" onclick="restartGame()" class="btn btn-pink">Restart</button>
-    {% endif %}
-{% endif %}
+</div>
