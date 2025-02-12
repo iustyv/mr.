@@ -10,7 +10,6 @@ class Card:
         self.suit = suit
         self.rank = rank
         self.value = Card.assign_value(rank)
-        self.img_src = self.suit + self.rank + '.png'
 
     def __gt__(self, other: 'Card'):
         """Is greater than: self >= other"""

@@ -5,9 +5,9 @@
     {% if round.get_current_player().name == my_player.name and not round.is_over() and game.is_full_room() %}
         <div class="card-container">
             {% for card in my_player.cards %}
-                {% set margin = loop.index0 * 40 %}
-                <button type="button" id="{{card.suit}}{{card.rank}}" onclick="toggleCardSelection('{{card.suit}}', '{{card.rank}}')" class="card card-btn card-child" style="left: {{ margin }}px;">
-                    <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+                {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
+                <button type="button" id="{{card.suit}}{{card.rank}}" onclick="toggleCardSelection('{{card.suit}}', '{{card.rank}}')" class="card card-btn card-child">
+                    <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
                 </button>
             {% endfor %}
         </div>
@@ -19,9 +19,9 @@
     {% else %}
         <div class="card-container">
             {% for card in my_player.cards %}
-            {% set margin = loop.index0 * 40 %}
-                <span class="card card-middle card-child" style="left: {{ margin }}px;">
-                    <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+                {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
+                <span class="card card-middle card-child">
+                    <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
                 </span>
             {% endfor %}
         </div>
@@ -34,8 +34,7 @@
             <div>{{ player.name }} {{ player.lost_rounds }}/3</div>
             <div class="card-container">
                 {% for card in player.cards %}
-                    {% set margin = loop.index0 * 25 %}
-                    <span class="card card-middle card-child" style="left: {{ margin }}px;">
+                    <span class="card card-middle card-child">
                         <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
                     </span>
                 {% endfor %}
@@ -47,9 +46,9 @@
 
 <div class="card-container">
     {% for card in round.middle_cards %}
-    {% set margin = loop.index0 * 40 %}
-        <span class="card card-middle card-child" style="left: {{ margin }}px;">
-            <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+        {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '.png' %}
+        <span class="card card-middle card-child">
+            <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
         </span>
     {% endfor %}
 </div>

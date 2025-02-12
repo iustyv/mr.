@@ -19,7 +19,6 @@
         {% include 'choose_card_form.html' %}
     {% else %}
         {% for card in player.cards %}
-            <!--<div>{{ card.suit }}, {{card.rank}}</div>-->
             <span class="card card-middle">
                 <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
             </span>
@@ -30,7 +29,8 @@
 
 {% for card in round.middle_cards %}
     <span class="card card-middle">
-        <img src="{{url_for('static', filename='img/cards/' ~ card.img_src)}}" alt="{{card.suit}} {{card.rank}}">
+        {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '.png' %}
+        <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
     </span>
 {% endfor %}
 
