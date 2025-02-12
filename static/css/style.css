@@ -7,15 +7,12 @@
 .card img {
     height: 100px;
     width: auto;
-    border: #3a3a3a solid 1px;
-    border-radius: 9px;
-    background-color: white;
+    border-radius: 5px;
 }
 
 .card-btn img {
     transition: transform 0.2s ease;
-    background-color: white;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .card-btn:hover img {
@@ -30,8 +27,36 @@
 }
 
 .card-child {
-    background-color: white;
     height: 100px;
     border-radius: 10px;
     margin-left: -40px;
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 8px 30px;
+    font-size: 15px;
+    transition: 0.2s ease;
+    border: 2px solid #FCCEFB;
+    text-decoration: none;
+}
+
+.btn-pink {
+    background-color: #FCCEFB;
+    color: #010C14;
+}
+
+.btn-pink:hover {
+    background-color: #b392b2;
+    border: 2px solid #b392b2;
+}
+
+.btn-dark {
+    background-color: #010C14;
+    color: #FCCEFB;
+}
+
+.btn-dark:hover {
+    background-color: #FCCEFB;
+    color: #010C14;
 }

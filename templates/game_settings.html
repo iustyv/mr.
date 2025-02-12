@@ -21,7 +21,7 @@
         <option value="3">3</option>
         <option value="4">4</option>
     </select>
-    <input type="submit" value="Graj" onclick="createMultiplayerGame(event)">
+    <input type="submit" value="Graj" onclick="createMultiplayerGame(event)" class="btn btn-pink">
 </form>
 
 <br>
@@ -30,11 +30,11 @@
 <form>
     <label for="join_code">Dołącz do gry</label>
     <input type="text" name="join_code" id="join_code" placeholder="Kod gry">
-    <button type="button" onclick="joinMultiplayerGame()">Dołącz</button>
+    <button type="button" onclick="joinMultiplayerGame()" class="btn btn-pink">Dołącz</button>
 </form>
 
 {% if session.game_uuid %}
-<a href="{{ url_for('game_get') }}">Wróć do gry</a>
+<a href="{{ url_for('game_get') }}" class="btn btn-pink">Wróć do gry</a>
 {% endif %}
 
 {% endblock %}

@@ -13,8 +13,8 @@
         </div>
         <form>
             <input type="hidden" id="card" name="card" value="">
-            <button type="button" onclick="playCard()">Ok</button>
-            <button type="button" onclick="skipCard()">Skip</button>
+            <button type="button" onclick="playCard()" class="btn btn-pink">Ok</button>
+            <button type="button" onclick="skipCard()" class="btn btn-dark">Skip</button>
         </form>
     {% else %}
         <div class="card-container">
@@ -60,6 +60,6 @@
 {% elif game.is_over() %}
     <p>Player {{ round.loser.name }} has lost the game.</p>
     {% if my_player == game.game_host %}
-        <button type="button" onclick="restartGame()">Restart</button>
+        <button type="button" onclick="restartGame()" class="btn btn-pink">Restart</button>
     {% endif %}
 {% endif %}
