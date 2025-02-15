@@ -264,12 +264,6 @@ class LocalRound(Round):
         self.create_queue()
         self.set_player_order()
 
-    def handle_ai_players(self):
-        if self.get_current_player().is_playable: return
-        self.get_current_player().make_move(self.middle_cards)
-        self.update_queue()
-        self.declare_loser_if_over()
-
 class MultiplayerRound(Round):
     def __init__(self, players: Dict[str, Player]):
         super().__init__(players)

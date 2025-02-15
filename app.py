@@ -157,7 +157,10 @@ def bot_move():
         return redirect(url_for('game_settings_get'))
 
     game = games[game_uuid]
-    game.current_round.handle_ai_players()
+    if game.current_round.get_current_player().is_playable:
+        return redirect(url_for('game_get'))
+
+    game.play()
 
     return redirect(url_for('game_get'))
 
