@@ -15,17 +15,21 @@ active_join_codes = {}
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('rules'))
 
-@app.route('/zasady')
+@app.route('/mr/game-rules')
 def rules():
     return render_template('rules.html')
 
-@app.get('/ustawienia-rozgrywki')
+@app.route('/mr/credits')
+def creds():
+    return render_template('credits.html')
+
+@app.get('/mr/game-settings')
 def game_settings_get():
     return render_template('game_settings.html')
 
-@app.post('/ustawienia-rozgrywki')
+@app.post('/mr/game-settings')
 def game_settings_post():
     game_mode = request.form.get('game_mode')
     player_count = int(request.form.get('player_count'))
@@ -52,12 +56,12 @@ def game_settings_post():
     session['game_uuid'] = game_uuid
     return redirect(url_for('game_get'))
 
-@app.get('/rozgrywka')
+@app.get('/mr/game')
 def game_get():
     game_uuid = session.get('game_uuid')
     if game_uuid is None or game_uuid not in games.keys():
         logging.error('Game uuid not found')
-        return redirect('/ustawienia-rozgrywki')
+        return redirect(url_for('game_settings_get'))
 
     game = games[game_uuid]
     if not isinstance(game, MultiplayerGame):
@@ -74,11 +78,11 @@ def game_get():
 
     return render_template('multiplayer_game.html', game=game, my_player=game.players.get(player_id))
 
-@app.post('/rozgrywka')
+@app.post('/mr/game')
 def game_post():
     game_uuid = session.get('game_uuid')
     if game_uuid is None or game_uuid not in games.keys():
-        return redirect('/ustawienia-rozgrywki')
+        return redirect(url_for('game_settings_get'))
 
     card = request.form.get('card')
     game = games[game_uuid]
@@ -145,14 +149,14 @@ def handle_skip_move():
 def bot_move():
     game_uuid = session.get('game_uuid')
     if game_uuid is None or game_uuid not in games.keys():
-        return redirect('/ustawienia-rozgrywki')
+        return redirect(url_for('game_settings_get'))
 
     game = games[game_uuid]
     game.current_round.handle_ai_players()
 
     return redirect(url_for('game_get'))
 
-@app.get('/sesja')
+@app.get('/session')
 def save_to_session():
     if request.referrer is None or request.referrer == request.url_root:
         print('manual access blocked')
@@ -179,7 +183,7 @@ def handle_create_game(player_count):
 
     socketio.emit('redirect',
                   url_for('save_to_session',
-                          redirect_url='/rozgrywka',
+                          redirect_url=url_for('game_get'),
                           player_id=player_id,
                           game_uuid=game_uuid),
                   to=request.sid)
@@ -213,7 +217,7 @@ def handle_join_game(join_code):
 
     emit('redirect',
                   url_for('save_to_session',
-                          redirect_url='/rozgrywka',
+                          redirect_url=url_for('game_get'),
                           player_id=player_id,
                           game_uuid=game_uuid),
                   to=request.sid)
