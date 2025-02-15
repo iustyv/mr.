@@ -248,9 +248,8 @@ def handle_join_room():
         join_room(game_uuid)
 
     game = games[game_uuid]
-    if player_id not in game.inactive_players: return
 
-    game.inactive_players = list(filter(lambda p_id: p_id != player_id, game.inactive_players))
+    game.inactive_players.discard(player_id)
 
     player_name = game.players.get(player_id).name
     emit('player_connected', {"player_id": player_id, "player_name": player_name}, to=game_uuid)

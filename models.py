@@ -322,7 +322,7 @@ class MultiplayerGame(Game):
         self.player_count = player_count
         self.is_started = False
         self.game_host = game_host
-        self.inactive_players = []
+        self.inactive_players = set()
 
     def is_full_room(self):
         return not self.inactive_players and len(self.players) == self.player_count
@@ -332,7 +332,7 @@ class MultiplayerGame(Game):
         self.players.update({player_id: player})
 
     def leave(self, player_id: str):
-        self.inactive_players.append(player_id)
+        self.inactive_players.add(player_id)
 
     def start_new_round(self):
         if not self.is_full_room(): return
