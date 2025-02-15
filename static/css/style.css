@@ -1,7 +1,78 @@
 body {
+    height: 100vh;
+    margin: 0;
     background-color: #010C14;
     color: whitesmoke;
     font-family: 'Liter', sans-serif;
+    position: relative;
+}
+
+:root {
+    --bs-body-color: #fccefb;
+    --pink-secondary: #b392b2;
+    --pink-tertiary: #7a6179;
+    --bs-body-bg: #010c14;
+    --bs-secondary-bg: #1d232e;
+    --bs-tertiary-bg: #0f1520;
+    --bs-border-color-translucent: rgba(252, 206, 251, 0.15);
+
+}
+
+.dropdown-menu {
+    --bs-dropdown-link-active-color: var(--bs-body-bg);
+    --bs-dropdown-link-active-bg: var(--bs-body-color);
+}
+
+.f-anton {
+    font-family: 'Anton', sans-serif;
+}
+
+.fs-40 {
+    font-size: 40px;
+}
+
+.f-pink {
+    color: var(--bs-body-color);
+}
+
+.f-pink-secondary {
+    color: var(--pink-secondary);
+}
+
+nav {
+    color: #FCCEFB;
+    width: fit-content;
+    position: absolute;
+    top: 50px;
+    left: 100px;
+}
+
+.menu-icon {
+    margin-top: 15px;
+    width:auto;
+    height: 24px;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.menu-icon:hover {
+    filter: brightness(70%);
+}
+
+.logo {
+    margin: 0;
+}
+
+.logo a {
+    text-decoration: none;
+    color: var(--bs-body-color);
+}
+
+.text-decoration-none {
+    text-decoration: none;
+}
+
+p {
+    margin: 0;
 }
 
 .card {
@@ -28,14 +99,33 @@ body {
 .card-container {
     display: flex;
     flex-wrap: wrap;
-    min-height: 100px;
+    min-height: 110px;
     padding-left: 40px;
 }
 
 .card-child {
-    height: 100px;
+    /*height: 100px;*/
     border-radius: 10px;
     margin-left: -40px;
+}
+
+.card-child img {
+    height: 110px;
+}
+
+.card-child-aside {
+    border-radius: 10px;
+    margin-left: -40px;
+    margin-top: -40px;
+}
+
+.card-child-aside img {
+    height: 90px;
+}
+
+#cards-aside .card-container {
+    max-width: 180px;
+    padding-top: 40px;
 }
 
 .btn {
@@ -44,33 +134,38 @@ body {
     font-size: 15px;
     transition: 0.2s ease;
     font-family: 'Liter', sans-serif;
-    border: 2px solid #FCCEFB;
+    /*border: 2px solid #FCCEFB;*/
     text-decoration: none;
 }
 
-.btn-pink {
-    background-color: #FCCEFB;
-    color: #010C14;
+.btn-primary {
+    --bs-btn-color: var(--bs-body-bg);
+    --bs-btn-bg: var(--bs-body-color);
+    --bs-btn-border-color: var(--bs-body-color);
+    --bs-btn-hover-color: var(--bs-body-bg);
+    --bs-btn-hover-bg: var(--pink-secondary);
+    --bs-btn-hover-border-color: var(--pink-secondary);
+    --bs-btn-active-color: var(--bs-body-color);
+    --bs-btn-active-bg: var(--bs-body-bg);
+    --bs-btn-active-border-color: var(--bs-body-color);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: var(--pink-tertiary);
+    --bs-btn-disabled-border-color: var(--pink-tertiary);
 }
 
-.btn-pink:hover {
-    background-color: #b392b2;
-    border: 2px solid #b392b2;
-}
-
-.btn-dark {
-    background-color: #010C14;
-    color: #FCCEFB;
-}
-
-.btn-dark:hover {
-    background-color: #FCCEFB;
-    color: #010C14;
-}
-
-#game-state {
-    display: flex;
-    justify-content: space-between;
+.btn-secondary {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-bg: var(--bs-body-bg);
+    --bs-btn-border-color: var(--bs-body-color);
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: var(--bs-secondary-bg);
+    --bs-btn-hover-border-color: var(--bs-body-color);
+    --bs-btn-active-color: var(--bs-body-bg);
+    --bs-btn-active-bg: var(--bs-body-color);
+    --bs-btn-active-border-color: var(--bs-body-color);
+    --bs-btn-disabled-color: var(--pink-tertiary);
+    --bs-btn-disabled-bg: var(--bs-body-bg);
+    --bs-btn-disabled-border-color: var(--pink-tertiary);
 }
 
 #main-board {
@@ -82,4 +177,21 @@ body {
 
 #cards-aside {
     width: 25%;
+}
+
+select, input[type="text" i] {
+    background-color: #010C14;
+    color: whitesmoke;
+    font-family: 'Liter', sans-serif;
+    border: 2px solid #FCCEFB;
+    border-radius: 10px;
+    padding: 8px 15px;
+}
+
+form {
+    padding: 20px 0;
+}
+
+.bg-dark-secondary {
+    background-color: var(--bs-tertiary-bg);
 }

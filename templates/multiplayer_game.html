@@ -1,74 +1,25 @@
-{% extends "base.html" %}
-
-{% block head %}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/functions.js') }}"></script>
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-{% endblock %}
+{% extends 'base.html' %}
 
 {% block title %}
-    Rozgrywka
+    Game
 {% endblock %}
 
 {% block body %}
+    <main style="height: 95vh; margin-top: -11vh;" class="d-flex justify-content-center align-items-center" id="game-state">
+        {% include 'game_state.html' %}
+    </main>
+{% endblock %}
 
-<div id="game-state">{% include 'game_state.html' %}</div>
-
-<div id="player-disconnected-msg" style="display: none;"></div>
-
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<a href="https://www.flaticon.com/free-icons/playing-cards" title="playing-cards icons">Playing-cards icons created by riajulislam - Flaticon</a><br>
-<a href="https://www.flaticon.com/free-icons/cards" title="cards icons">Cards icons created by Md Tanvirul Haque - Flaticon</a>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        socket.on('connect', () => {
-            console.log('joined room')
-            socket.emit('join_room')
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            socket.on('connect', () => {
+                console.log('joined room')
+                socket.emit('join_room')
+            })
         })
 
-        socket.on('player_disconnected', (data) => {
-            console.log('player_disconnected', data.player_id, data.player_name)
-            console.log('inactive: {{ game.inactive_players }}')
-            socket.emit('request_game_state_update')
-            const element = document.getElementById('player-disconnected-msg')
-
-            element.innerHTML = 'Player ' + data.player_name + ' has left the game.'
-            element.style.display = 'block'
-        });
-
-        socket.on('player_connected', (data) => {
-            console.log('player_connected', data.player_name)
-            console.log('Game is full: {{ game.is_full_room() }}')
-            console.log('inactive: {{ game.inactive_players }}')
-            socket.emit('request_game_state_update')
-
-            document.getElementById('player-disconnected-msg').style.display = 'none'
-        })
-
-        socket.on('request_game_state_update', () => {
-            console.log('request_game_state_update received')
-            socket.emit('request_game_state_update')
-        })
-
-        socket.on('update_game_state', (data) => {
-            console.log('updated game state')
-            document.getElementById('game-state').innerHTML = data.html;
-            console.log('{{ game.current_round.move_queue[0].name }}')
-        });
-
-    })
-
-    let selectedCards = [];
-    let selectedRank = null;
-</script>
-
+        let selectedCards = [];
+        let selectedRank = null;
+    </script>
 {% endblock %}

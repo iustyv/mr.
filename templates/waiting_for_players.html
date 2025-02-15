@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <!--<meta http-equiv="refresh" content="2; url={{ url_for('game_get') }}" >-->
-<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <!--<meta http-equiv="refresh" content="2; url={{ url_for('game_get') }}" >
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>-->
+{% endblock %}
+
+{% block title %}
+    Waiting for players
 {% endblock %}
 
 {% block body %}
-    {{ game.join_code }}
-    <br>
-    Oczekiwanie na graczy
-    <br>
-    {{ game.players|count }} gracz(y) / {{ game.player_count }} graczy
+    <main style="height: 100vh; margin-top: -11vh;" class="d-flex flex-column justify-content-center align-items-center">
+        <p class="h2 f-pink f-anton pb-3">{{ game.join_code }}</p>
+        <p>Waiting for players</p>
+        <p>{{ game.players|count }} player(s) / {{ game.player_count }} players</p>
+    </main>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {

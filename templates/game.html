@@ -1,60 +1,90 @@
 {% extends "base.html" %}
+{% set round = game.current_round %}
 
 {% block head %}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/functions.js') }}"></script>
-    {% if not round.move_queue[0].is_playable %}
-        <meta http-equiv="refresh" content="2; url={{ url_for('bot_move') }}" >
+    {% if not round.get_current_player().is_playable %}
+        {% set time = range(1, 4) | random %}
+        <meta http-equiv="refresh" content="{{ time }}; url={{ url_for('bot_move') }}" >
     {% endif %}
 {% endblock %}
 
 {% block title %}
-    Rozgrywka
+    Game
 {% endblock %}
 
 {% block body %}
+    <main style="height: 95vh; margin-top: -11vh;" class="d-flex justify-content-center align-items-center" id="game-state">
+        <div id="main-board" style="padding-right: -250px;">
+            <div class="card-container">
+                {% for card in round.middle_cards %}
+                    {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '.png' %}
+                    <span class="card card-middle card-child">
+                        <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
+                    </span>
+                {% endfor %}
+            </div>
 
-{% for player in round.move_queue %}
-    <div>{{ player.name }}</div>
-    {% if round.move_queue[0] == player and round.move_queue[0].is_playable %}
-        {% include 'choose_card_form.html' %}
-    {% else %}
-        {% for card in player.cards %}
-            <span class="card card-middle">
-                <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
-            </span>
-        {% endfor %}
-    {% endif %}
-    <br>
-{% endfor %}
+            <div class="pt-5 mt-5">
+                <div><span class="f-anton f-pink h4">You </span><span class="f-pink-secondary f-anton h4">({{ my_player.name }})</span><span> {{ my_player.lost_rounds }}/3</span></div>
+                {% if round.get_current_player() == my_player %}
+                    <div class="card-container">
+                        {% for card in my_player.cards %}
+                            {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
+                            <button type="button" id="{{card.suit}}{{card.rank}}" onclick="toggleCardSelection('{{card.suit}}', '{{card.rank}}')" class="card card-btn card-child">
+                                <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
+                            </button>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form action="{{ url_for('game_post') }}" method="post">
+                            <input type="hidden" id="card" name="card" value="">
+                            <input type="submit" value="Ok" class="btn btn-primary">
+                        </form>
+                        <form method="post" action="{{ url_for('game_post') }}">
+                            <input type="hidden" name="skip" value="true">
+                            <button type="submit" class="btn btn-secondary">Skip</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="card-container">
+                        {% for card in my_player.cards %}
+                            {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
+                            <span class="card card-middle card-child">
+                                <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-{% for card in round.middle_cards %}
-    <span class="card card-middle">
-        {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '.png' %}
-        <img src="{{url_for('static', filename = img_src)}}" alt="{{card.suit}} {{card.rank}}">
-    </span>
-{% endfor %}
+        <div id="cards-aside" style="width: 250px;">
+            {% for player in round.player_order %}
+                {% if not player == my_player %}
+                    {% if round.get_current_player() == player %}
+                        {% set class_underline = 'text-decoration-underline' %}{% else %}{% set class_underline = '' %}
+                    {% endif %}
 
-{% if round.is_over() %}
-    {% for player in round.players.values() %}
-        <div>{{ player.name }}, {{ player.lost_rounds}}</div>
-    {% endfor %}
-{% endif %}
+                    <div id="{{ player.name }}">
+                        <div class="py-2"><span class="f-pink f-anton h4 {{ class_underline }}">{{ player.name }}</span> {{ player.lost_rounds }}/3</div>
+                        <div class="card-container">
+                            {% for card in player.cards %}
+                                <span class="card card-child-aside">
+                                    <img src="{{url_for('static', filename='img/cards/playing-card.png')}}" alt="back of a playing card">
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                <br>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}
 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<a href="https://www.flaticon.com/free-icons/playing-cards" title="playing-cards icons">Playing-cards icons created by riajulislam - Flaticon</a><br>
-<a href="https://www.flaticon.com/free-icons/spade-card" title="spade card icons">Spade card icons created by Md Tanvirul Haque - Flaticon</a>
-
-<script>
-    let selectedCards = [];
-    let selectedRank = null;
-</script>
-
+{% block scripts %}
+    <script>
+        let selectedCards = [];
+        let selectedRank = null;
+    </script>
 {% endblock %}

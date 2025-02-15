@@ -42,7 +42,9 @@ def game_settings_post():
 
     players = {}
     if game_mode == 'bot':
-        players.update({str(uuid.uuid4()) : HumanPlayer('human')})
+        player_id = str(uuid.uuid4())
+        players.update({player_id : HumanPlayer('human')})
+        session['player_id'] = player_id
         for x in range(player_count - 1):
             players.update({str(uuid.uuid4()) : AiPlayer('player' + '%d' % (x + 2))})
     elif game_mode == 'hotseat':
@@ -65,7 +67,10 @@ def game_get():
 
     game = games[game_uuid]
     if not isinstance(game, MultiplayerGame):
-        return render_template('game.html', round=game.current_round)
+        my_player = game.current_round.get_current_player()
+        if not my_player.is_playable:
+            my_player = game.players[session.get('player_id')]
+        return render_template('game.html', game=game, my_player = my_player)
 
     print(f"Users in {game_uuid}: {socketio.server.manager.rooms.get('/', {}).get(game_uuid, [])}")
 

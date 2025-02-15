@@ -1,9 +1,35 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Zasady
+    Game rules
 {% endblock %}
 
 {% block body %}
-<h1>Zasady</h1>
+    <main style="height: 100vh; margin-top: -11vh;" class="d-flex justify-content-center align-items-center">
+        <div class="bg-dark-secondary p-5 rounded-5 w-50">
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <h1 class="f-anton h2 f-pink mb-0">Game rules</h1>
+                <img src="{{url_for('static', filename = 'img/spades-symbol.png')}}" height="40" alt="Spades icon">
+            </div>
+            <div class="pt-5">
+                <h2 class="f-anton h4 f-pink pb-1">Objective</h2>
+                <p>The player aims to lay out all the cards in the round. If they are the last one to fail to do so, they lose the round. The game continues until one of the players loses a total of three rounds.</p>
+            </div>
+
+            <div class="pt-5">
+                <h2 class="f-anton h4 f-pink pb-1">Setup</h2>
+                <p>The game can be played by 2 to 4 players and it uses a deck of 24 cards (9, 10, W, D, K, A). The following card seniority applies: A – K – D – W – 10 – 9.</p>
+                <p class="pt-1">Each player receives an equal number of cards. Each player only sees their cards.</p>
+                <p class="pt-1">The game begins with the player with the <span class="f-pink fw-bold">9 of Hearts</span>, placing it face up in the middle. It remains in the middle until the end of the round.</p>
+            </div>
+            <div class="pt-5">
+                <h2 class="f-anton h4 f-pink pb-1">How to play</h2>
+                <ul>
+                    <li>The player places a card of <span class="f-pink fw-bold pb-1">equal or greater value</span> than the last one placed in the middle.</li>
+                    <li>If they have <span class="f-pink fw-bold pb-1">4 cards with the same value</span> greater than the one in the middle, they can lay them down in one move (the exception is 9 - then the player lays down three).</li>
+                    <li>If a player <span class="f-pink fw-bold pb-1">does not have or does not want</span> to play a card of equal or greater value, they must take the three most recently placed cards from the middle. If there are fewer than three cards in the middle, the player takes all but the 9 of Hearts.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
 {% endblock %}
