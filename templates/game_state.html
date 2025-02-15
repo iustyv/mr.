@@ -1,6 +1,6 @@
 {% set round = game.current_round %}
 
-<div id="main-board" style="padding-right: -250px;">
+<div id="main-board">
     <div class="card-container">
         {% for card in round.middle_cards %}
             {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '.png' %}

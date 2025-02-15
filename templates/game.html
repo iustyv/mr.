@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block body %}
-    <main style="height: 95vh; margin-top: -11vh;" class="d-flex justify-content-center align-items-center" id="game-state">
+    <main style="height: 100vh; margin-top: -11vh;" class="d-flex justify-content-center align-items-center" id="game-state">
         <div id="main-board" style="padding-right: -250px;">
             <div class="card-container">
                 {% for card in round.middle_cards %}
@@ -26,7 +26,7 @@
 
             <div class="pt-5 mt-5">
                 <div><span class="f-anton f-pink h4">You </span><span class="f-pink-secondary f-anton h4">({{ my_player.name }})</span><span> {{ my_player.lost_rounds }}/3</span></div>
-                {% if round.get_current_player() == my_player %}
+                {% if round.get_current_player() == my_player and not round.is_over() %}
                     <div class="card-container">
                         {% for card in my_player.cards %}
                             {% set img_src = 'img/cards/' ~ card.suit ~ card.rank ~ '-fill.png' %}
