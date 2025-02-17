@@ -197,21 +197,34 @@ class AiPlayer(Player):
         super().__init__(name)
         self.is_playable = False
 
-    def make_move(self, middle_cards: 'MiddleCards', **kwargs):
-        if not middle_cards:
-            card = self.get_card(Card('H', '9'))
-            middle_cards.append(card)
-            self.cards.remove(card)
-            return
-
-        card = self.cards.get_lowest_valid_card(middle_cards)
-        if card is None:
+    def make_move(self, middle_cards: MiddleCards, **kwargs):
+        move = LowestMoveStrategy().get_move(middle_cards, self.cards)
+        if move is None:
             self.take_middle(middle_cards)
             return
 
-        middle_cards.append(card)
-        self.cards.remove(card)
+        middle_cards.extend(move)
+        self.cards.remove_many(move)
 
+class StrategyFactory:
+    @staticmethod
+    def get_strategy(name: str) -> 'Strategy':
+        pass
+
+class Strategy:
+    @abstractmethod
+    def get_move(self, middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | None:
+        raise NotImplementedError
+
+class LowestMoveStrategy(Strategy):
+    def get_move(self, middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | None:
+        lowest_card = player_cards.get_lowest_valid_card(middle_cards)
+        if not lowest_card: return None
+
+        combo = player_cards.get_combo_by_rank(lowest_card.rank)
+        if not combo: return [lowest_card]
+
+        return combo
 
 class Round:
     def __init__(self, players: Dict[str, Player]):
