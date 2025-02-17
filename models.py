@@ -58,6 +58,9 @@ class CardList(list):
     def count_by_rank(self, rank: str) -> int:
         return len(self.get_by_rank(rank))
 
+    def remove_many(self, cards: List[Card]):
+        self[:] = [card for card in self if card not in cards]
+
 class PlayerCards(CardList):
     def get_starter(self) -> Card | None:
         return next((card for card in self if card.is_starter()), None)
