@@ -79,7 +79,8 @@ class PlayerCards(CardList):
         if len(combo) == 3 and not any(card.is_starter() for card in combo):
             return combo
         if len(combo) == 4:
-            return combo.sort(key=lambda card: not card.is_starter())
+            combo.sort(key=lambda card: not card.is_starter())
+            return combo
 
         return None
 
