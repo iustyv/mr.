@@ -2,6 +2,7 @@ import logging
 import string
 import time
 from abc import abstractmethod
+from asyncio import start_server
 from typing import List, Dict
 import random
 
@@ -30,6 +31,9 @@ class Card:
     def is_starter(self) -> bool:
         return self.suit == 'H' and self.rank == '9'
 
+    def has_same_value(self, other: 'Card') -> bool:
+        return self.value == other.value
+
     @staticmethod
     def assign_value(rank: str) -> int:
         """
@@ -47,6 +51,44 @@ class Card:
             return Card(card[0], card[1:])
         return [Card(card[0], card[1:]) for card in move]
 
+class CardList(list):
+    def get_by_rank(self, rank: str):
+        return CardList(card for card in self if card.rank == rank)
+
+    def count_by_rank(self, rank: str) -> int:
+        return len(self.get_by_rank(rank))
+
+class PlayerCards(CardList):
+    def get_starter(self) -> Card | None:
+        return next((card for card in self if card.is_starter()), None)
+
+    def get_lowest_valid_card(self, middle_cards: 'MiddleCards') -> Card | None:
+        if not middle_cards:
+            return self.get_starter()
+
+        valid_cards = [card for card in self if card >= middle_cards.last()]
+        return min(valid_cards, default=None, key=lambda card: card.value)
+
+    def get_combo_by_rank(self, rank: str) -> List[Card] | None:
+        combo = self.get_by_rank(rank)
+        if len(combo) < 3: return None
+
+        if rank != '9':
+            return combo if len(combo) == 4 else None
+
+        if len(combo) == 3 and not any(card.is_starter() for card in combo):
+            return combo
+        if len(combo) == 4:
+            return combo.sort(key=lambda card: not card.is_starter())
+
+        return None
+
+class MiddleCards(CardList):
+    def last(self):
+        return self[-1] if self else None
+
+    def get_current_rank(self) -> str | None:
+        return self[-1].rank if self else None
 
 class Deck:
     def __init__(self):
@@ -88,7 +130,7 @@ class Deck:
 class Player:
     def __init__(self, name: str = None):
         self.name = Player.generate_name() if name is None else name
-        self.cards: List[Card] = []
+        self.cards: PlayerCards = PlayerCards()
         self.lost_rounds = 0
         self.is_playable = False
 
@@ -151,19 +193,14 @@ class AiPlayer(Player):
         super().__init__(name)
         self.is_playable = False
 
-    def get_lowest_valid_card(self, last_card: Card) -> Card | None:
-        valid_cards = [card for card in self.cards if card >= last_card]
-        return min(valid_cards, default=None, key=lambda card: card.value)
-
-
-    def make_move(self, middle_cards: List[Card], **kwargs):
+    def make_move(self, middle_cards: 'MiddleCards', **kwargs):
         if not middle_cards:
             card = self.get_card(Card('H', '9'))
             middle_cards.append(card)
             self.cards.remove(card)
             return
 
-        card = self.get_lowest_valid_card(middle_cards[-1])
+        card = self.cards.get_lowest_valid_card(middle_cards)
         if card is None:
             self.take_middle(middle_cards)
             return
@@ -174,7 +211,7 @@ class AiPlayer(Player):
 
 class Round:
     def __init__(self, players: Dict[str, Player]):
-        self.middle_cards: List[Card] = []
+        self.middle_cards: MiddleCards = MiddleCards()
         self.players = players
         self.move_queue: List[Player] = []
         self.player_order: List[Player] = []
@@ -184,7 +221,7 @@ class Round:
         deck = Deck()
         card_count = int(len(deck) / len(self.players))
         for player in self.players.values():
-            player.cards = deck.deal(card_count)
+            player.cards = PlayerCards(deck.deal(card_count))
 
     def create_queue(self):
         starter_player = None
