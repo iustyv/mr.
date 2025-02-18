@@ -2,7 +2,7 @@
 {% set round = game.current_round %}
 
 {% block head %}
-    {% if not round.get_current_player().is_playable %}
+    {% if not game.is_over() and not round.get_current_player().is_playable %}
         {% set time = range(1, 4) | random %}
         <meta http-equiv="refresh" content="{{ time }}; url={{ url_for('bot_move') }}" >
     {% endif %}
@@ -56,6 +56,10 @@
                     </div>
                 {% endif %}
             </div>
+
+            {% if game.is_over() %}
+                <p class="py-4">Player {{ round.loser.name }} has lost the game.</p>
+            {% endif %}
         </div>
 
         <div id="cards-aside" style="width: 250px;">

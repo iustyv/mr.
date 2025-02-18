@@ -345,6 +345,7 @@ class Game:
         pass
 
     def play(self, **kwargs):
+        if self.is_over(): return
         self.current_round.play(**kwargs)
 
         self.declare_loser_if_over()
