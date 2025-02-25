@@ -1,7 +1,16 @@
 import string
 from abc import abstractmethod
+from enum import IntEnum
 from typing import List, Dict
 import random
+
+class CardValue(IntEnum):
+    C_9 = 1
+    C_10 = 2
+    C_J = 3
+    C_Q = 4
+    C_K = 5
+    C_A = 6
 
 class Card:
     def __init__(self, suit: str, rank: str):
