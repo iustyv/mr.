@@ -58,11 +58,11 @@ class Card:
         return [Card(card[0], card[1:]) for card in move]
 
 class CardList(list):
-    def get_by_rank(self, rank: str):
-        return CardList(card for card in self if card.rank == rank)
+    def get_by_value(self, value: int):
+        return CardList(card for card in self if card.value == value)
 
-    def count_by_rank(self, rank: str) -> int:
-        return len(self.get_by_rank(rank))
+    def count_by_value(self, value: int) -> int:
+        return len(self.get_by_value(value))
 
     def remove_many(self, cards: List[Card]):
         self[:] = [card for card in self if card not in cards]
@@ -78,11 +78,11 @@ class PlayerCards(CardList):
         valid_cards = [card for card in self if card >= middle_cards.last()]
         return min(valid_cards, default=None, key=lambda card: card.value)
 
-    def get_combo_by_rank(self, rank: str) -> List[Card] | None:
-        combo = self.get_by_rank(rank)
+    def get_combo_by_value(self, value: int) -> List[Card] | None:
+        combo = self.get_by_value(value)
         if len(combo) < 3: return None
 
-        if rank != '9':
+        if value != 1:
             return combo if len(combo) == 4 else None
 
         if len(combo) == 3 and not any(card.is_starter() for card in combo):
