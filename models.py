@@ -64,8 +64,17 @@ class CardList(list):
     def count_by_value(self, value: int) -> int:
         return len(self.get_by_value(value))
 
-    def remove_many(self, cards: List[Card]):
-        self[:] = [card for card in self if card not in cards]
+    def add_one_or_more(self, cards: Card | List[Card]):
+        if isinstance(cards, Card):
+            self.append(cards)
+        else:
+            self.extend(cards)
+
+    def remove_one_or_more(self, cards: Card | List[Card]):
+        if isinstance(cards, Card):
+            self.remove(cards)
+        else:
+            self[:] = [card for card in self if card not in cards]
 
 class PlayerCards(CardList):
     def get_starter(self) -> Card | None:
@@ -209,8 +218,8 @@ class AiPlayer(Player):
             self.take_middle(middle_cards)
             return
 
-        middle_cards.extend(move)
-        self.cards.remove_many(move)
+        middle_cards.add_one_or_more(move)
+        self.cards.remove_one_or_more(move)
 
 class StrategyFactory:
     @staticmethod
