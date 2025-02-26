@@ -204,7 +204,7 @@ class AiPlayer(Player):
         self.is_playable = False
 
     def make_move(self, middle_cards: MiddleCards, **kwargs):
-        move = LowestMoveStrategy().get_move(middle_cards, self.cards)
+        move = BasicStrategy().get_move(middle_cards, self.cards)
         if move is None:
             self.take_middle(middle_cards)
             return
@@ -223,7 +223,7 @@ class Strategy:
     def get_move(middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | Card | None:
         raise NotImplementedError
 
-class LowestMoveStrategy(Strategy):
+class BasicStrategy(Strategy):
     @staticmethod
     def get_move(middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | Card | None:
         lowest_card = player_cards.get_lowest_valid_card(middle_cards)
