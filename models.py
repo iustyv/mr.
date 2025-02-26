@@ -102,12 +102,48 @@ class PlayerCards(CardList):
 
         return None
 
+    def contains_invalid_cards(self, middle_cards: 'MiddleCards') -> bool:
+        return any(card < middle_cards.last() for card in self) if middle_cards else False
+
+    def contains_urgent_cards(self, middle_cards: 'MiddleCards') -> bool:
+        return any(middle_cards.is_last_card_from_rank(card, self) for card in self)
+
+    def get_valid_cards(self, middle_cards: 'MiddleCards') -> 'PlayerCards':
+        return PlayerCards([card for card in self if card >= middle_cards.last()])
+
+    def get_invalid_cards(self, middle_cards: 'MiddleCards') -> 'PlayerCards':
+        return PlayerCards([card for card in self if card < middle_cards.last()])
+
 class MiddleCards(CardList):
     def last(self):
         return self[-1] if self else None
 
-    def get_current_rank(self) -> str | None:
-        return self[-1].rank if self else None
+    def get_worst_skip_value(self) -> int | None:
+        if len(self) <= 1: return None
+        if len(self) < 4: return self[1].value
+        return min(self[-3:], default=None, key=lambda card: card.value).value
+
+    def is_last_card_from_rank(self, card: Card, player_cards: PlayerCards) -> bool:
+        temp = player_cards.count_by_value(card.value)
+        return temp + self.count_by_value(card.value) == 4
+
+    def get_high_value(self) -> int:
+        return min(self[-1].value + 3, CardValue.C_A)
+
+    def last_move_is_combo(self) -> bool:
+        return any(card.value != self[-1].value for card in self[-4:]) if len(self) >= 4 else False
+
+    def has_good_skip_value(self) -> bool:
+        return self.get_worst_skip_value() >= self[-1].value - 1 if len(self) > 1 else True
+
+    def is_developed(self) -> bool:
+        return any(card.value > CardValue.C_10 for card in self)
+
+    def get_skip_cards(self) -> CardList | None:
+        if len(self) <= 1: return None
+        if len(self) == 2: return CardList([self[-1]])
+        if len(self) == 3: return CardList(self[-2:])
+        return CardList(self[-3:])
 
 class Deck:
     def __init__(self):
@@ -211,20 +247,79 @@ class AiPlayer(Player):
     def __init__(self, name: str = None):
         super().__init__(name)
         self.is_playable = False
+        self.skipped_moves_in_row = 0
 
     def make_move(self, middle_cards: MiddleCards, **kwargs):
         move = BasicStrategy().get_move(middle_cards, self.cards)
         if move is None:
+            self.skipped_moves_in_row += 1
             self.take_middle(middle_cards)
             return
 
+        self.skipped_moves_in_row = 0
         middle_cards.add_one_or_more(move)
         self.cards.remove_one_or_more(move)
+
+    def has_good_high_cards_ratio(self, middle_cards: MiddleCards) -> bool:
+        high_cards = [card for card in self.cards if card.value > CardValue.C_Q]
+        return len(high_cards) >= len(middle_cards) / 3
+
+    def skipped_last_moves(self, move_count: int = 2) -> bool:
+        return self.skipped_moves_in_row >= move_count
+
+    def gets_combo_if_skipped(self, middle_cards: MiddleCards):
+        skip_cards = middle_cards.get_skip_cards()
+        if not skip_cards: return False
+
+        for skip_card in skip_cards:
+            cards_by_value = self.cards.get_by_value(skip_card.value)
+            if not cards_by_value: continue
+
+            combo_length = len(cards_by_value) + len(skip_cards.get_by_value(skip_card.value))
+            if combo_length < 3: continue
+            if combo_length == 3: return skip_card.value == CardValue.C_9
+            return True
+
+    def gets_just_aces_if_skipped(self, middle_cards):
+        skip_cards = middle_cards.get_skip_cards()
+        return not any(card.value != CardValue.C_A for card in skip_cards) if skip_cards else False
 
 class StrategyFactory:
     @staticmethod
     def get_strategy(name: str) -> 'Strategy':
         pass
+
+    @staticmethod
+    def vote_for_strategy(bot: AiPlayer, middle_cards: MiddleCards):
+        votes = {AggressiveStrategy: 0, BasicStrategy: 0, SkipStrategy: 0}
+
+        conditions = [
+            (AggressiveStrategy, bot.cards.contains_urgent_cards(middle_cards), 4),
+
+            (BasicStrategy, not bot.cards.contains_invalid_cards(middle_cards), 4),
+            (BasicStrategy, not middle_cards.is_developed(), 2),
+
+            ((AggressiveStrategy, BasicStrategy), bot.skipped_last_moves(), 2),
+            ((AggressiveStrategy, BasicStrategy), middle_cards.last_move_is_combo(), 2),
+            ((AggressiveStrategy, BasicStrategy), not middle_cards.has_good_skip_value(), 2),
+            ((AggressiveStrategy, BasicStrategy), bot.has_good_high_cards_ratio(middle_cards), 1),
+
+            (SkipStrategy, bot.gets_just_aces_if_skipped(middle_cards), 3),
+            (SkipStrategy, bot.gets_combo_if_skipped(middle_cards), 2),
+            (SkipStrategy, not bot.skipped_last_moves(), 2),
+            (SkipStrategy, not middle_cards.last_move_is_combo(), 1),
+            (SkipStrategy, not bot.has_good_high_cards_ratio(middle_cards), 1),
+            (SkipStrategy, middle_cards.has_good_skip_value(), 1),
+        ]
+
+        for strategy, condition, weight in conditions:
+            if condition:
+                if isinstance(strategy, tuple):
+                    for strat in strategy:
+                        votes[strat] += weight
+                else:
+                    votes[strategy] += weight
+        return votes
 
 class Strategy:
     @staticmethod
