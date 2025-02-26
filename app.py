@@ -218,10 +218,11 @@ def handle_join_game(join_code):
     else:
         print(f"Room {game_uuid} does not exist!")
 
-    emit('reload', to=game_uuid)
-
     if game.is_full_room():
+        game.start()
         active_join_codes.pop(join_code)
+
+    emit('reload', to=game_uuid)
 
     emit('redirect',
                   url_for('save_to_session',
@@ -276,6 +277,7 @@ def handle_disconnect():
 
     game = games[game_uuid]
     player_name = game.players.get(player_id).name
+    if not isinstance(game, MultiplayerGame): return
     game.leave(player_id)
 
     emit('player_disconnected', {"player_id": player_id, "player_name": player_name}, to=game_uuid)
