@@ -234,6 +234,21 @@ class BasicStrategy(Strategy):
 
         return combo
 
+class AggressiveStrategy(Strategy):
+    @staticmethod
+    def get_move(middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | Card | None:
+        high_values = [cv for cv in CardValue if cv > CardValue.C_J and cv >= middle_cards.last().value]
+        if not high_values: return None
+
+        value = random.choice(high_values)
+        attack = player_cards.get_by_value(value)
+        if attack: return attack[0]
+
+class SkipStrategy(Strategy):
+    @staticmethod
+    def get_move(middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | Card | None:
+        return None
+
 class Round:
     def __init__(self, players: Dict[str, Player]):
         self.middle_cards: MiddleCards = MiddleCards()
