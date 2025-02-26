@@ -15,7 +15,7 @@ active_join_codes = {}
 
 @app.route('/')
 def index():
-    return redirect(url_for('rules'))
+    return redirect(url_for('game_settings_get'))
 
 @app.route('/mr/game-rules')
 def rules():
