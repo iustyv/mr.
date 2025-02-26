@@ -218,17 +218,19 @@ class StrategyFactory:
         pass
 
 class Strategy:
+    @staticmethod
     @abstractmethod
-    def get_move(self, middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | None:
+    def get_move(middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | Card | None:
         raise NotImplementedError
 
 class LowestMoveStrategy(Strategy):
-    def get_move(self, middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | None:
+    @staticmethod
+    def get_move(middle_cards: MiddleCards, player_cards: PlayerCards) -> List[Card] | Card | None:
         lowest_card = player_cards.get_lowest_valid_card(middle_cards)
         if not lowest_card: return None
 
-        combo = player_cards.get_combo_by_rank(lowest_card.rank)
-        if not combo: return [lowest_card]
+        combo = player_cards.get_combo_by_value(lowest_card.value)
+        if not combo: return lowest_card
 
         return combo
 
