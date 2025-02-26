@@ -250,7 +250,9 @@ class AiPlayer(Player):
         self.skipped_moves_in_row = 0
 
     def make_move(self, middle_cards: MiddleCards, **kwargs):
-        move = BasicStrategy().get_move(middle_cards, self.cards)
+        strategy = StrategyFactory.get_strategy(self, middle_cards)
+        move = strategy.get_move(middle_cards, self.cards)
+
         if move is None:
             self.skipped_moves_in_row += 1
             self.take_middle(middle_cards)
@@ -286,8 +288,9 @@ class AiPlayer(Player):
 
 class StrategyFactory:
     @staticmethod
-    def get_strategy(name: str) -> 'Strategy':
-        pass
+    def get_strategy(bot: AiPlayer, middle_cards: MiddleCards) -> 'Strategy':
+        votes = StrategyFactory.vote_for_strategy(bot, middle_cards)
+        return StrategyFactory.choose_strategy(votes)
 
     @staticmethod
     def vote_for_strategy(bot: AiPlayer, middle_cards: MiddleCards):
@@ -320,6 +323,12 @@ class StrategyFactory:
                 else:
                     votes[strategy] += weight
         return votes
+
+    @staticmethod
+    def choose_strategy(votes: dict) -> 'Strategy':
+        max_votes = max(votes.values())
+        best_strategies = [strategy for strategy, count in votes.items() if count == max_votes]
+        return random.choice(best_strategies)
 
 class Strategy:
     @staticmethod
